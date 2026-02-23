@@ -110,3 +110,41 @@
   font-size: 13px;
   color: var(--main-gray-1);
 }
+
+/* Dark mode */
+.dark .replay .header--title {
+  color: var(--dark-primary-text);
+}
+
+.dark .replay .header--subtitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark .replay .scrub.active {
+  color: #6aa9f4;
+}
+
+.dark .replay--controls-container {
+  background: var(--dark-background);
+  border-top-color: #444;
+}
+
+.dark .replay--control-icons {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .scrub--speed--option {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .scrub--speed--option.selected {
+  color: #6aa9f4;
+}
+
+.dark .replay--unavailable {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .replay--save-status {
+  color: rgba(255, 255, 255, 0.5);
+}

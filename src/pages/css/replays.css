@@ -97,3 +97,38 @@
 .replays .main-table td a:hover {
   text-decoration: underline;
 }
+
+/* Dark mode */
+.dark .replays .header--title {
+  color: var(--dark-primary-text);
+}
+
+.dark .replays .header--subtitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dark .replays .scrub.active {
+  color: #6aa9f4;
+}
+
+.dark .replays .limit--button {
+  border-color: #555;
+  color: var(--dark-primary-text);
+}
+
+.dark .replays .limit--button:hover {
+  color: var(--dark-primary-text);
+  background-color: #383838;
+}
+
+.dark .replays .main-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .replays .main-table td {
+  border-bottom-color: #444;
+}
+
+.dark .replays .main-table td a {
+  color: #6aa9f4;
+}

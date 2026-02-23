@@ -95,3 +95,13 @@
   font-size: 20px;
   font-weight: bold;
 }
+
+/* Dark mode */
+.dark .battle--main {
+  border-color: #444;
+}
+
+.dark .battle--button.disabled {
+  color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
