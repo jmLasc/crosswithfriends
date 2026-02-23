@@ -43,7 +43,11 @@ export default class MobileGridControls extends GridControls {
     // appears/disappears, but visualViewport.resize does.
     if (window.visualViewport) {
       this._handleViewportResize = () => {
-        this.fitOnScreen(true);
+        // Use fitOnScreen(false) — just enforce boundaries without forcing
+        // the selected cell into view. The keyboard appears from the bottom,
+        // so the cell was already visible; aggressive panning just creates
+        // unnecessary whitespace.
+        this.fitOnScreen();
       };
       window.visualViewport.addEventListener('resize', this._handleViewportResize);
     }
