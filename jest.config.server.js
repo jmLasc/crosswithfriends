@@ -10,7 +10,7 @@ module.exports = {
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {tsconfig: 'server/tsconfig.json'}],
-    '^.+\\.jsx?$': 'babel-jest',
+    '^.+\\.jsx?$': ['babel-jest', {presets: ['@babel/preset-env']}],
   },
   transformIgnorePatterns: ['/node_modules/'],
 };

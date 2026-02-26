@@ -1,12 +1,11 @@
+import {vi} from 'vitest';
+import React from 'react';
 import Entry, {EntryProps} from '../Entry';
 
 // Mock react-router-dom Link to avoid router context requirement
-jest.mock('react-router-dom', () => {
-  const React = require('react');
-  return {
-    Link: ({children, to, ...rest}: any) => React.createElement('a', {href: to, ...rest}, children),
-  };
-});
+vi.mock('react-router-dom', () => ({
+  Link: ({children, to, ...rest}: any) => React.createElement('a', {href: to, ...rest}, children),
+}));
 
 function makeEntry(overrides: Partial<EntryProps> = {}): Entry {
   const defaultProps: EntryProps = {

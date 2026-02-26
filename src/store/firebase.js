@@ -24,7 +24,7 @@ const CONFIGS = {
     appId: '1:132564774895:web:a3bf48cd38c4df81e8901a',
   },
 };
-const config = CONFIGS[process.env.REACT_APP_ENV || process.env.NODE_ENV];
+const config = CONFIGS[import.meta.env.VITE_ENV || import.meta.env.MODE];
 
 firebase.initializeApp(config);
 const db = firebase.database();

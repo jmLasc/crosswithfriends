@@ -13,9 +13,10 @@ yarn devbackend                         # Backend dev server (port 3021, watches
 
 ### Testing
 ```sh
-yarn test --watchAll=false              # Frontend tests (Jest via react-scripts)
+yarn test                               # Frontend tests (Vitest, single run)
+yarn test:watch                         # Frontend tests in watch mode
 yarn test:server --ci                   # Server tests (Jest with ts-jest, separate config)
-yarn test -- --testPathPattern=path     # Run a single frontend test file
+yarn vitest run -- path                 # Run a single frontend test file
 yarn test:server -- --testPathPattern=path  # Run a single server test file
 ```
 
@@ -38,7 +39,8 @@ npx prettier --check .                  # Format check
 npx prettier --write .                  # Auto-fix formatting
 yarn tsc --noEmit                       # Frontend type check
 yarn tsc --noEmit -p server/tsconfig.json  # Server type check
-yarn build                              # Production build
+yarn build                              # Production build (Vite)
+yarn preview                            # Serve production build locally
 ```
 
 ### Full CI Equivalent
@@ -53,7 +55,7 @@ All of these must pass before merging to master:
 
 ## Architecture
 
-**Frontend** (React 16, CRA v5): `src/` — pages in `src/pages/`, components in `src/components/` organized by feature (Game, Grid, Player, Chat, Auth, Toolbar, Upload). State via Redux-like stores in `src/store/` plus React Context (AuthContext, GlobalContext). API clients in `src/api/`.
+**Frontend** (React 17, Vite): `src/` — pages in `src/pages/`, components in `src/components/` organized by feature (Game, Grid, Player, Chat, Auth, Toolbar, Upload). State via Redux-like stores in `src/store/` plus React Context (AuthContext, GlobalContext). API clients in `src/api/`. Build tooling: Vite for dev/build, Vitest for frontend tests.
 
 **Backend** (Express + TypeScript): `server/` — routes in `server/api/`, database models in `server/model/`, auth via Passport + JWT in `server/auth/`. Entry point is `server/server.ts`.
 

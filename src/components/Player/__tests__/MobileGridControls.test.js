@@ -1,3 +1,4 @@
+import {vi} from 'vitest';
 import MobileGridControls from '../MobileGridControls';
 import {makeGrid, makeDefaultProps} from '../testHelpers';
 
@@ -5,15 +6,15 @@ function makeMobileInstance(overrides = {}) {
   const props = makeDefaultProps({
     size: 30,
     enablePan: false,
-    onSetCursorLock: jest.fn(),
-    onChangeDirection: jest.fn(),
+    onSetCursorLock: vi.fn(),
+    onChangeDirection: vi.fn(),
     ...overrides,
   });
   const instance = new MobileGridControls(props);
   instance.props = props;
   instance.inputRef = {
     current: {
-      focus: jest.fn(),
+      focus: vi.fn(),
       value: '$',
       selectionStart: 1,
       selectionEnd: 1,
@@ -29,7 +30,7 @@ function makeMobileInstance(overrides = {}) {
     transform: {scale: 1, translateX: 0, translateY: 0},
     dbgstr: undefined,
   };
-  instance.setState = jest.fn((updater) => {
+  instance.setState = vi.fn((updater) => {
     if (typeof updater === 'function') {
       Object.assign(instance.state, updater(instance.state));
     } else {
@@ -52,29 +53,29 @@ function makeInputEvent(value) {
 describe('MobileGridControls.handleInputChange — letter input', () => {
   it('types a letter when input changes from "$" to "$a"', () => {
     const {instance, props} = makeMobileInstance();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance.handleInputChange(makeInputEvent('$a'));
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledWith(0, 0, 'A');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('types multiple letters for gesture keyboard input "$hello"', () => {
     const {instance, props} = makeMobileInstance();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance.handleInputChange(makeInputEvent('$hello'));
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledTimes(5);
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('handles digit input', () => {
     const {instance, props} = makeMobileInstance();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance.handleInputChange(makeInputEvent('$5'));
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledWith(0, 0, '5');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
@@ -83,11 +84,11 @@ describe('MobileGridControls.handleInputChange — backspace', () => {
     const {instance, props} = makeMobileInstance({
       grid: makeGrid({'0,0': {value: 'A'}}),
     });
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance.handleInputChange(makeInputEvent(''));
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledWith(0, 0, '');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
@@ -128,12 +129,12 @@ describe('MobileGridControls — validLetter regression', () => {
     // This is THE critical test. Before the fix, this threw:
     // TypeError: this.validLetter is not a function
     const {instance, props} = makeMobileInstance();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     expect(() => {
       instance.handleInputChange(makeInputEvent('$A'));
     }).not.toThrow();
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalled();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });

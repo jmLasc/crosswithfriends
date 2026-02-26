@@ -104,7 +104,7 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
         } catch (err) {
           console.error('Failed to fetch puzzles:', err);
           setError(
-            process.env.REACT_APP_MAINTENANCE_MESSAGE ||
+            import.meta.env.VITE_MAINTENANCE_MESSAGE ||
               'Cross with Friends backend is currently unavailable. Please try again later.'
           );
         } finally {

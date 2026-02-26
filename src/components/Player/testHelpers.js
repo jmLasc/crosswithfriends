@@ -1,3 +1,4 @@
+/* global vi */
 import GridWrapper from '../../lib/wrappers/GridWrapper';
 
 // 3x3 grid with black square at (1,1)
@@ -46,15 +47,15 @@ export function makeDefaultProps(overrides = {}) {
     editMode: false,
     beta: false,
     skipFilledSquares: true,
-    updateGrid: jest.fn(),
-    onSetSelected: jest.fn(),
-    onSetDirection: jest.fn(),
-    canSetDirection: jest.fn(() => true),
-    onPressEnter: jest.fn(),
-    onPressPeriod: jest.fn(),
-    onPressEscape: jest.fn(),
-    onCheck: jest.fn(),
-    onReveal: jest.fn(),
+    updateGrid: vi.fn(),
+    onSetSelected: vi.fn(),
+    onSetDirection: vi.fn(),
+    canSetDirection: vi.fn(() => true),
+    onPressEnter: vi.fn(),
+    onPressPeriod: vi.fn(),
+    onPressEscape: vi.fn(),
+    onCheck: vi.fn(),
+    onReveal: vi.fn(),
     ...overrides,
   };
 }
@@ -63,8 +64,8 @@ export function makeControlsInstance(ControlsClass, overrides = {}) {
   const props = makeDefaultProps(overrides);
   const instance = new ControlsClass(props);
   instance.props = props;
-  instance.inputRef = {current: {focus: jest.fn()}};
-  instance.setState = jest.fn((updater) => {
+  instance.inputRef = {current: {focus: vi.fn()}};
+  instance.setState = vi.fn((updater) => {
     if (typeof updater === 'function') {
       Object.assign(instance.state, updater(instance.state));
     } else {

@@ -1,16 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "module": "esnext",
     "noFallthroughCasesInSwitch": true,
-    "jsx": "react-jsx"
+    "types": ["vite/client", "vitest/globals"],
+    "paths": {
+      "@shared/*": ["./src/shared/*"],
+      "@lib/*": ["./src/lib/*"]
+    }
   },
-  "paths": {
-    "@shared/*": [
-      "./src/shared/*"
-    ],
-    "@lib/*": [
-      "./src/lib/*"
-    ]
-  }
+  "include": ["src", ".eslintrc.js", "vite.config.ts", "vitest.config.ts"]
 }

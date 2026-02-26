@@ -1,5 +1,7 @@
+import {vi} from 'vitest';
+
 // Mock store/user to avoid Firebase import chain
-jest.mock('../../../../src/store/user', () => ({
+vi.mock('../../../../src/store/user', () => ({
   getUser: () => ({id: 'mock-user'}),
 }));
 
@@ -110,7 +112,7 @@ describe('SET_GAME', () => {
 
 describe('error handling', () => {
   it('returns unchanged state for unknown event type', () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation();
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const event = {
       type: 'UNKNOWN_TYPE' as any,
       params: {},

@@ -63,7 +63,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run frontend tests
-        run: yarn test --watchAll=false --ci
+        run: yarn test
 
   test-server:
     name: Tests (Server)

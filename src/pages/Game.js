@@ -599,7 +599,7 @@ export default class Game extends Component {
               fontSize: '14px',
             }}
           >
-            {process.env.REACT_APP_MAINTENANCE_MESSAGE ||
+            {import.meta.env.VITE_MAINTENANCE_MESSAGE ||
               'Unable to connect to the server. The backend may be undergoing maintenance.'}{' '}
             Reach out on{' '}
             <a

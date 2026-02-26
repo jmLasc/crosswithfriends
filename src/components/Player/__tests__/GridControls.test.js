@@ -1,15 +1,16 @@
 /* eslint no-underscore-dangle: "off" */
+import {vi} from 'vitest';
 import GridControls from '../GridControls';
 import {makeGrid, makeControlsInstance} from '../testHelpers';
 
 describe('GridControls._handleKeyDown — letter input', () => {
   it('calls updateGrid with uppercase letter', () => {
     const {instance, props} = makeControlsInstance(GridControls);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance._handleKeyDown('a', false, false);
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledWith(0, 0, 'A');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('does not call updateGrid when frozen', () => {
@@ -26,11 +27,11 @@ describe('GridControls._handleKeyDown — letter input', () => {
 
   it('accepts digit keys', () => {
     const {instance, props} = makeControlsInstance(GridControls);
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     instance._handleKeyDown('5', false, false);
-    jest.runAllTimers();
+    vi.runAllTimers();
     expect(props.updateGrid).toHaveBeenCalledWith(0, 0, '5');
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 });
 
@@ -161,7 +162,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: true,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: true});
     expect(spy).toHaveBeenCalled();
   });
@@ -174,7 +175,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: true,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: true});
     expect(spy).not.toHaveBeenCalled();
   });
@@ -187,7 +188,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: true,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: true});
     expect(spy).toHaveBeenCalled();
   });
@@ -200,7 +201,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: true,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: true});
     expect(spy).not.toHaveBeenCalled();
     expect(props.onSetSelected).toHaveBeenCalledWith({r: 0, c: 1});
@@ -214,7 +215,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: true,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: true});
     expect(spy).not.toHaveBeenCalled();
   });
@@ -227,7 +228,7 @@ describe('GridControls.goToNextEmptyCell — auto-advance', () => {
       direction: 'across',
       autoAdvanceCursor: false,
     });
-    const spy = jest.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
+    const spy = vi.spyOn(instance, 'selectNextClue').mockImplementation(() => {});
     instance.goToNextEmptyCell({nextClueIfFilled: false});
     expect(spy).not.toHaveBeenCalled();
   });

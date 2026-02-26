@@ -1,3 +1,4 @@
+import {vi} from 'vitest';
 import gameReducer from '../gameReducer';
 import {initialState} from '../initialState';
 import {GameState} from '../types/GameState';
@@ -61,7 +62,7 @@ describe('gameReducer basics', () => {
 
   it('returns current state for unknown event type', () => {
     const state = createGame();
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = gameReducer(state, {type: 'nonexistent_event' as any, params: {}});
     expect(result).toBe(state);
     expect(spy).toHaveBeenCalled();
