@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import classnames from 'classnames';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import React from 'react';
 
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -142,5 +142,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 */
-// eslint-disable-next-line react/no-deprecated -- React 16 doesn't support createRoot
-ReactDOM.render(<Root />, document.getElementById('root'));
+createRoot(document.getElementById('root')).render(<Root />);

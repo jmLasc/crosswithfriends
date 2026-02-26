@@ -8,6 +8,7 @@ export const FencingCountdown: React.FC<{
   playerActions: PlayerActions;
   gameState: GameState;
   gameEventsHook: GameEventsHook;
+  children?: React.ReactNode;
 }> = (props) => {
   const [renderCount, setRenderCount] = useState(0);
   const classes = useStyles();

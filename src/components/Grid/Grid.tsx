@@ -146,7 +146,6 @@ export default class Grid extends React.PureComponent<GridProps> {
   render() {
     const {size, cellStyle} = this.props;
     const sizeClass = Grid.getSizeClass(size);
-
     const data = this.props.grid.map((row, r) =>
       row.map((cell, c) => ({
         ...cell,

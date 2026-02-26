@@ -1,6 +1,5 @@
 import './css/ActionMenu.css';
 import React, {Component} from 'react';
-import {findDOMNode} from 'react-dom';
 
 /*
  * Summary of ActionMenu component
@@ -37,8 +36,7 @@ export default class ActionMenu extends Component {
   }
 
   handlePointerDown = (e) => {
-    // eslint-disable-next-line react/no-find-dom-node
-    const refNode = findDOMNode(this.containerRef.current);
+    const refNode = this.containerRef.current;
     if (refNode?.contains(e.target)) {
       return;
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import {usePrevious} from 'react-use';
 
-const RerenderBoundary: React.FC<{name: string; hash: string}> = (props) => {
+const RerenderBoundary: React.FC<{name: string; hash: string; children?: React.ReactNode}> = (props) => {
   const prevChildren = React.useRef<React.ReactNode>(props.children);
   const prevHash = usePrevious(props.hash);
   if (prevHash !== props.hash) {
