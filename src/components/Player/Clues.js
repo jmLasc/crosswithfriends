@@ -55,7 +55,7 @@ export default class Clues extends Component {
             <div key={dir} className="clues--list">
               <div className="clues--list--title">{dir.toUpperCase()}</div>
 
-              <div className={`clues--list--scroll ${dir}`} ref={`clues--list--${dir}`}>
+              <div className={`clues--list--scroll ${dir}`}>
                 {clues[dir].map(
                   (clue, clueIndex) =>
                     clue && (

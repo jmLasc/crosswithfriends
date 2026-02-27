@@ -2,7 +2,7 @@ import _ from 'lodash';
 import * as uuid from 'uuid';
 import React, {useState, useEffect, useCallback} from 'react';
 import {useUpdateEffect} from 'react-use';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import type {Socket} from 'socket.io-client';
 import {useSocket} from '../../sockets/useSocket';
 import {emitAsync} from '../../sockets/emitAsync';

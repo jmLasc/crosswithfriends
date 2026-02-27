@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import _ from 'lodash';
 import querystring from 'querystring';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import Nav from '../components/common/Nav';
 
 import {GameModel, getUser, BattleModel} from '../store';

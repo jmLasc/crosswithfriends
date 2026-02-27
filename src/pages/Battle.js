@@ -2,7 +2,7 @@ import './css/battle.css';
 
 import React, {Component} from 'react';
 import _ from 'lodash';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import classnames from 'classnames';
 import {BattleModel} from '../store';

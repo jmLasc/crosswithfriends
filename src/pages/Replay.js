@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import './css/replay.css';
 import React, {Component} from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {MdPlayArrow, MdPause, MdChevronLeft, MdChevronRight} from 'react-icons/md';
 import _ from 'lodash';
 

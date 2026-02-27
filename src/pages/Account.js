@@ -2,7 +2,7 @@
 import './css/account.css';
 
 import React, {useContext, useState, useEffect} from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {useLocation, useNavigate, Link} from 'react-router-dom';
 import Nav from '../components/common/Nav';
 import Footer from '../components/common/Footer';

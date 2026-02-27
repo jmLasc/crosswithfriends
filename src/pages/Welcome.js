@@ -1,7 +1,7 @@
 import './css/welcome.css';
 
 import React, {Component} from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {
   MdSearch,
   MdCheckBoxOutlineBlank,

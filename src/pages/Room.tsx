@@ -1,7 +1,7 @@
 import React, {Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState} from 'react';
 import {useUpdateEffect} from 'react-use';
 import _ from 'lodash';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {useParams} from 'react-router-dom';
 
 import type {Socket} from 'socket.io-client';

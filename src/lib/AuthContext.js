@@ -82,7 +82,7 @@ export function AuthProvider({children}) {
     refreshUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext value={value}>{children}</AuthContext>;
 }
 
 export default AuthContext;

@@ -1,6 +1,6 @@
 import './css/replays.css';
 
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import _ from 'lodash';
 import React, {Component} from 'react';
 import Promise from 'bluebird';

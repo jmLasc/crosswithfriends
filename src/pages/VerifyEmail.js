@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-bind, consistent-return, no-nested-ternary */
 import React, {useContext, useState, useEffect, useRef} from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {useLocation, useNavigate, Link} from 'react-router-dom';
 import Nav from '../components/common/Nav';
 import Footer from '../components/common/Footer';

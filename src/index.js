@@ -2,6 +2,7 @@
 import classnames from 'classnames';
 import {createRoot} from 'react-dom/client';
 import React from 'react';
+import {HelmetProvider} from 'react-helmet-async';
 
 import useMediaQuery from './lib/hooks/useMediaQuery';
 import {BrowserRouter as Router, Route, Routes, Navigate, useLocation} from 'react-router-dom';
@@ -93,46 +94,48 @@ const Root = () => {
   }, [darkMode]);
 
   return (
-    <Router>
-      <AuthProvider>
-        <GlobalContext.Provider value={{toggleMolesterMoons, darkModePreference}}>
-          <div className={classnames('router-wrapper', {mobile: isMobile(), dark: darkMode})}>
-            <VerificationGate>
-              <Routes>
-                <Route path="/auth/google/callback" element={<GoogleCallback />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/" element={<WrappedWelcome />} />
-                <Route path="/fencing" element={<WrappedWelcome fencing />} />
-                {/* <Route path="/stats" element={<Stats />} /> */}
-                <Route path="/game/:gid" element={<Game />} />
-                <Route path="/embed/game/:gid" element={<Game />} />
-                <Route path="/room/:rid" element={<Room />} />
-                <Route path="/embed/room/:rid" element={<Room />} />
-                <Route path="/replay/:gid" element={<Replay />} />
-                <Route path="/beta/replay/:gid" element={<Replay />} />
-                <Route path="/replays/:pid" element={<Replays />} />
-                <Route path="/replays" element={<Replays />} />
-                <Route path="/beta" element={<WrappedWelcome />} />
-                <Route path="/beta/game/:gid" element={<Game />} />
-                <Route path="/beta/battle/:bid" element={<Battle />} />
-                <Route path="/beta/play/:pid" element={<Play />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/:userId" element={<Profile />} />
-                <Route path="/fencing/:gid" element={<Fencing />} />
-                <Route path="/beta/fencing/:gid" element={<Fencing />} />
-                <Route path="/discord" element={<DiscordRedirect />} />
-              </Routes>
-            </VerificationGate>
-          </div>
-        </GlobalContext.Provider>
-      </AuthProvider>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <AuthProvider>
+          <GlobalContext value={{toggleMolesterMoons, darkModePreference}}>
+            <div className={classnames('router-wrapper', {mobile: isMobile(), dark: darkMode})}>
+              <VerificationGate>
+                <Routes>
+                  <Route path="/auth/google/callback" element={<GoogleCallback />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/" element={<WrappedWelcome />} />
+                  <Route path="/fencing" element={<WrappedWelcome fencing />} />
+                  {/* <Route path="/stats" element={<Stats />} /> */}
+                  <Route path="/game/:gid" element={<Game />} />
+                  <Route path="/embed/game/:gid" element={<Game />} />
+                  <Route path="/room/:rid" element={<Room />} />
+                  <Route path="/embed/room/:rid" element={<Room />} />
+                  <Route path="/replay/:gid" element={<Replay />} />
+                  <Route path="/beta/replay/:gid" element={<Replay />} />
+                  <Route path="/replays/:pid" element={<Replays />} />
+                  <Route path="/replays" element={<Replays />} />
+                  <Route path="/beta" element={<WrappedWelcome />} />
+                  <Route path="/beta/game/:gid" element={<Game />} />
+                  <Route path="/beta/battle/:bid" element={<Battle />} />
+                  <Route path="/beta/play/:pid" element={<Play />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/help" element={<Help />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/:userId" element={<Profile />} />
+                  <Route path="/fencing/:gid" element={<Fencing />} />
+                  <Route path="/beta/fencing/:gid" element={<Fencing />} />
+                  <Route path="/discord" element={<DiscordRedirect />} />
+                </Routes>
+              </VerificationGate>
+            </div>
+          </GlobalContext>
+        </AuthProvider>
+      </Router>
+    </HelmetProvider>
   );
 };
 /*

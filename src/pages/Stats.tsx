@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {fetchStats} from '../api/stats';
 import {ListPuzzleStatsResponse} from '../shared/types';
 import {getUser} from '../store/user';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import Nav from '../components/common/Nav';
 import {formatMilliseconds} from '../components/Toolbar/Clock';
 

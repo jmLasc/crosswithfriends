@@ -1,4 +1,5 @@
 import {createElement, Fragment, ReactNode} from 'react';
+import type {JSX} from 'react';
 
 type Tree = {name?: string; children: Tree[]} | {name: 'text'; value: string};
 

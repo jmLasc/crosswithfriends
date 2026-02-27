@@ -1,7 +1,7 @@
 import './css/profile.css';
 
 import React, {useContext, useState, useEffect} from 'react';
-import {Helmet} from 'react-helmet';
+import {Helmet} from 'react-helmet-async';
 import {useParams, useNavigate, Link} from 'react-router-dom';
 
 import {MdPeople} from 'react-icons/md';
