@@ -62,7 +62,7 @@ All of these must pass before merging to master:
 
 ## Architecture
 
-**Frontend** (React 18, Vite): `src/` — pages in `src/pages/`, components in `src/components/` organized by feature (Game, Grid, Player, Chat, Auth, Toolbar, Upload). State via Redux-like stores in `src/store/` plus React Context (AuthContext, GlobalContext). API clients in `src/api/`. Build tooling: Vite for dev/build, Vitest for frontend tests.
+**Frontend** (React 19, Vite): `src/` — pages in `src/pages/`, components in `src/components/` organized by feature (Game, Grid, Player, Chat, Auth, Toolbar, Upload). State via Redux-like stores in `src/store/` plus React Context (AuthContext, GlobalContext). API clients in `src/api/`. Build tooling: Vite for dev/build, Vitest for frontend tests.
 
 **Backend** (Express + TypeScript): `server/` — routes in `server/api/`, database models in `server/model/`, auth via Passport + JWT in `server/auth/`. Entry point is `server/server.ts`.
 
