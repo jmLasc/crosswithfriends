@@ -249,7 +249,7 @@ export default class Cell extends React.Component<Props> {
           onKeyDown={this.handleKeyDown}
           onContextMenu={this.handleRightClick}
         >
-          {this.renderImage()}
+          {black && this.renderImage()}
           {this.renderPings()}
         </div>
       );
