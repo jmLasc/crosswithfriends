@@ -22,7 +22,7 @@ app.use(
     contentSecurityPolicy: false, // disable CSP for now — MUI v4 uses inline styles
   })
 );
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '500kb'}));
 app.use(cookieParser());
 app.use(passport.initialize());
 const port = process.env.PORT || 3000;
