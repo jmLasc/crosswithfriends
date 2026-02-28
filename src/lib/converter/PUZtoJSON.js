@@ -1,8 +1,7 @@
 /* eslint no-plusplus: "off", no-bitwise: "off" */
 
 // Windows-1252 bytes 0x80-0x9F map to different Unicode code points than
-// String.fromCharCode gives. This lookup avoids depending on TextDecoder
-// (unavailable in Jest/jsdom) and handles curly quotes, em dashes, etc.
+// String.fromCharCode gives. This lookup handles curly quotes, em dashes, etc.
 const CP1252 = {
   0x80: 0x20ac,
   0x82: 0x201a,
@@ -42,6 +41,17 @@ function decodeWindows1252(byteArray) {
   return result;
 }
 
+// Some modern .puz files use UTF-8 encoding for clue text (e.g., box-drawing
+// characters, special symbols). Try UTF-8 first; fall back to Windows-1252.
+function decodeString(byteArray) {
+  try {
+    const decoder = new TextDecoder('utf-8', {fatal: true});
+    return decoder.decode(new Uint8Array(byteArray));
+  } catch {
+    return decodeWindows1252(byteArray);
+  }
+}
+
 function getExtension(bytes, code) {
   // struct byte format is 4S H H
   let i = 0;
@@ -72,7 +82,7 @@ function getRebus(bytes) {
     return undefined; // no rebus
   }
   const solbytes = getExtension(bytes, rtbl);
-  const solstring = decodeWindows1252(solbytes);
+  const solstring = decodeString(solbytes);
   if (!solstring) {
     return undefined;
   }
@@ -193,7 +203,7 @@ export default function PUZtoJSON(buffer) {
     while (ibyte < bytes.length && bytes[ibyte] !== 0) {
       ibyte++;
     }
-    const str = decodeWindows1252(bytes.slice(start, ibyte));
+    const str = decodeString(bytes.slice(start, ibyte));
     ibyte++; // skip null terminator
     return str;
   }

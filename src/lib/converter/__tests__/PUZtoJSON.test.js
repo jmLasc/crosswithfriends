@@ -230,6 +230,37 @@ describe('PUZtoJSON', () => {
     expect(acrossClues[0]).toBe('\u201CA\u201D\u2014B'); // "A"—B
   });
 
+  it('decodes UTF-8 encoded special characters in clues', () => {
+    // Some modern .puz files use UTF-8 for clue text containing Unicode chars
+    // like box-drawing symbols (□ = U+25A1 = UTF-8 bytes E2 96 A1)
+    const solution = [
+      ['A', 'B'],
+      ['C', '.'],
+    ];
+    const buffer = buildPuzBuffer({
+      nrow: 2,
+      ncol: 2,
+      solution,
+      clues: ['placeholder', 'placeholder'],
+    });
+
+    const bytes = new Uint8Array(buffer);
+    const gridEnd = 52 + 2 * 2 * 2;
+    const clueStart = gridEnd + 3;
+
+    // Write UTF-8 bytes for "A□B" where □ is U+25A1 (E2 96 A1)
+    bytes[clueStart] = 0x41; // A
+    bytes[clueStart + 1] = 0xe2; // □ byte 1
+    bytes[clueStart + 2] = 0x96; // □ byte 2
+    bytes[clueStart + 3] = 0xa1; // □ byte 3
+    bytes[clueStart + 4] = 0x42; // B
+    bytes[clueStart + 5] = 0x00; // null terminator
+
+    const result = PUZtoJSON(bytes.buffer);
+    const acrossClues = result.across.filter(Boolean);
+    expect(acrossClues[0]).toBe('A\u25A1B'); // A□B
+  });
+
   it('returns empty circles and shades when no extensions', () => {
     const solution = [
       ['A', 'B'],
