@@ -82,6 +82,10 @@
   color: var(--pencil-color);
 }
 
+.dark .cell--shade {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
 .dark .clues--list--scroll {
   background-color: var(--dark-background-1);
 }
