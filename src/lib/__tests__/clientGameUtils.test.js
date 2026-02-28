@@ -76,6 +76,28 @@ describe('makeGrid', () => {
     expect(grid.grid[0][0].value).toBe('');
   });
 
+  it('sets isImage on cells matching images map', () => {
+    const textGrid = [
+      ['A', '', 'B'],
+      ['C', 'D', 'E'],
+    ];
+    const images = {1: 'data:image/png;base64,abc'};
+    const grid = makeGrid(textGrid, false, images);
+    expect(grid.grid[0][1].isImage).toBe(true);
+    expect(grid.grid[0][0].isImage).toBeUndefined();
+    expect(grid.grid[1][0].isImage).toBeUndefined();
+  });
+
+  it('does not set isImage when images is empty', () => {
+    const textGrid = [
+      ['A', 'B'],
+      ['C', '.'],
+    ];
+    const grid = makeGrid(textGrid, false, {});
+    expect(grid.grid[0][0].isImage).toBeUndefined();
+    expect(grid.grid[0][1].isImage).toBeUndefined();
+  });
+
   it('assigns numbers to cells that start clues', () => {
     const textGrid = [
       ['A', 'B'],

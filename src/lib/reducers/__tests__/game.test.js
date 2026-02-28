@@ -317,6 +317,64 @@ describe('reduce — solved detection', () => {
   });
 });
 
+describe('reduce — solved detection with image cells', () => {
+  it('solves when image cells have empty solution and empty value', () => {
+    // 2x2 grid: (0,0)=A, (0,1)=image cell, (1,0)=B, (1,1)=black
+    let game = makeGame({
+      grid: [
+        [
+          {value: '', black: false},
+          {value: '', black: false, isImage: true},
+        ],
+        [
+          {value: '', black: false},
+          {value: '', black: true},
+        ],
+      ],
+      solution: [
+        ['A', ''],
+        ['B', '.'],
+      ],
+    });
+    game = reduce(game, {
+      type: 'updateCell',
+      timestamp: 2000,
+      params: {cell: {r: 0, c: 0}, value: 'A', id: 'u1'},
+    });
+    game = reduce(game, {
+      type: 'updateCell',
+      timestamp: 3000,
+      params: {cell: {r: 1, c: 0}, value: 'B', id: 'u1'},
+    });
+    expect(game.solved).toBe(true);
+  });
+
+  it('does not solve when only image cells match but real cells do not', () => {
+    let game = makeGame({
+      grid: [
+        [
+          {value: '', black: false},
+          {value: '', black: false, isImage: true},
+        ],
+        [
+          {value: '', black: false},
+          {value: '', black: true},
+        ],
+      ],
+      solution: [
+        ['A', ''],
+        ['B', '.'],
+      ],
+    });
+    game = reduce(game, {
+      type: 'updateCell',
+      timestamp: 2000,
+      params: {cell: {r: 0, c: 0}, value: 'Z', id: 'u1'},
+    });
+    expect(game.solved).toBe(false);
+  });
+});
+
 describe('reduce — contest puzzles', () => {
   function makeContestGame() {
     return makeGame({

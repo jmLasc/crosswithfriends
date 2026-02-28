@@ -196,6 +196,62 @@ describe('getWritableLocations', () => {
   });
 });
 
+describe('isFilled with image cells', () => {
+  it('returns true for image cells even with empty value', () => {
+    const grid = [
+      [
+        {value: '', black: false, isImage: true},
+        {value: 'A', black: false},
+      ],
+    ];
+    const wrapper = new GridWrapper(grid);
+    expect(wrapper.isFilled(0, 0)).toBe(true);
+  });
+
+  it('returns false for empty non-image cells', () => {
+    const grid = [
+      [
+        {value: '', black: false},
+        {value: 'A', black: false},
+      ],
+    ];
+    const wrapper = new GridWrapper(grid);
+    expect(wrapper.isFilled(0, 0)).toBe(false);
+  });
+});
+
+describe('isGridFilled with image cells', () => {
+  it('considers grid filled when only image cells are empty', () => {
+    const grid = [
+      [
+        {value: 'A', black: false},
+        {value: '', black: false, isImage: true},
+      ],
+      [
+        {value: 'B', black: false},
+        {value: '', black: true},
+      ],
+    ];
+    const wrapper = new GridWrapper(grid);
+    expect(wrapper.isGridFilled()).toBe(true);
+  });
+
+  it('considers grid not filled when non-image white cell is empty', () => {
+    const grid = [
+      [
+        {value: '', black: false},
+        {value: '', black: false, isImage: true},
+      ],
+      [
+        {value: 'B', black: false},
+        {value: '', black: true},
+      ],
+    ];
+    const wrapper = new GridWrapper(grid);
+    expect(wrapper.isGridFilled()).toBe(false);
+  });
+});
+
 describe('toTextGrid', () => {
   it('converts grid to text representation', () => {
     const grid = makeGrid();
