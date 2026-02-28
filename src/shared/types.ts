@@ -22,6 +22,7 @@ export interface CellData {
   good?: boolean;
   pencil?: boolean;
   isHidden?: boolean; // used for fencing mode; if true, then player cannot access the cell at all
+  isImage?: boolean; // decorative image cell — part of the word but non-typeable
   solvedBy?: {
     id: string;
     teamId: number;
@@ -51,6 +52,7 @@ export interface GameJson {
   clues: CluesJson;
   circles?: CellIndex[];
   shades?: CellIndex[];
+  images?: Record<number, string>;
   contest?: boolean;
 }
 
@@ -84,6 +86,7 @@ export interface PuzzleJson {
   info: InfoJson;
   circles: string[];
   shades: string[];
+  images?: Record<number, string>;
   clues: CluesJson;
   private?: boolean;
   contest?: boolean;

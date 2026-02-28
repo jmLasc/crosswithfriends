@@ -23,6 +23,7 @@ export interface EnhancedCellData extends CellData {
   frozen: boolean;
   circled: boolean;
   shaded: boolean;
+  image?: string;
   referenced: boolean;
   canFlipColor: boolean;
   pickupType: keyof typeof powerups;
@@ -150,6 +151,14 @@ export default class Cell extends React.Component<Props> {
     const {shaded} = this.props;
     if (shaded) {
       return <div className="cell--shade" />;
+    }
+    return null;
+  }
+
+  renderImage() {
+    const {image} = this.props;
+    if (image) {
+      return <img src={image} alt="" className="cell--image--bg" draggable={false} />;
     }
     return null;
   }
@@ -285,17 +294,20 @@ export default class Cell extends React.Component<Props> {
           {this.renderFlipButton()}
           {this.renderCircle()}
           {this.renderShade()}
+          {this.renderImage()}
           {this.renderPickup()}
           {this.renderSolvedBy()}
-          <div
-            className="cell--value"
-            style={{
-              fontSize: `${350 / Math.sqrt(l)}%`,
-              lineHeight: `${Math.sqrt(l) * 98}%`,
-            }}
-          >
-            {val}
-          </div>
+          {!this.props.image && (
+            <div
+              className="cell--value"
+              style={{
+                fontSize: `${350 / Math.sqrt(l)}%`,
+                lineHeight: `${Math.sqrt(l) * 98}%`,
+              }}
+            >
+              {val}
+            </div>
+          )}
         </div>
         {this.renderCursors()}
         {this.renderPings()}

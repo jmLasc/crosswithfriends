@@ -37,8 +37,8 @@ export default class Puzzle extends EventEmitter {
   }
 
   toGame() {
-    const {info, circles = [], shades = [], grid: solution, pid} = this.data;
-    const gridObject = makeGrid(solution);
+    const {info, circles = [], shades = [], images = {}, grid: solution, pid} = this.data;
+    const gridObject = makeGrid(solution, false, images);
     const clues = gridObject.alignClues(this.data.clues);
     const grid = gridObject.toArray();
 
@@ -46,6 +46,7 @@ export default class Puzzle extends EventEmitter {
       info,
       circles,
       shades,
+      ...(Object.keys(images).length > 0 ? {images} : {}),
       clues,
       solution,
       pid,

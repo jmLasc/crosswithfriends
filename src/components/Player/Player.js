@@ -187,6 +187,9 @@ export default class Player extends Component {
     if (this.grid.isHidden(selected.r, selected.c)) {
       return;
     }
+    if (this.props.grid[selected.r][selected.c].isImage) {
+      return;
+    }
     if (this.isValidDirection(this.state.direction, selected)) {
       if (selected.r !== this.selected.r || selected.c !== this.selected.c) {
         this.setState(
@@ -371,6 +374,7 @@ export default class Player extends Component {
       clues,
       circles,
       shades,
+      images,
       beta,
       cursors: allCursors = [],
       pings: allPings = [],
@@ -420,6 +424,7 @@ export default class Player extends Component {
       grid: gridWithColors,
       circles,
       shades,
+      images,
       selected,
       references: this.getReferences(),
       direction,

@@ -82,6 +82,13 @@ export default class ListView extends React.PureComponent<ListViewProps> {
     return (shades || []).indexOf(idx) !== -1 || this.isDoneByOpponent(r, c);
   }
 
+  getImage(r: number, c: number): string | undefined {
+    const {grid, images} = this.props;
+    if (!images) return undefined;
+    const idx = toCellIndex(r, c, grid[0].length);
+    return images[idx];
+  }
+
   isHighlighted(r: number, c: number, dir: 'across' | 'down' = this.props.direction) {
     if (!this.selectedIsWhite) return false;
     const {selected, direction} = this.props;
@@ -110,6 +117,7 @@ export default class ListView extends React.PureComponent<ListViewProps> {
 
   handleClick = (r: number, c: number, dir: 'across' | 'down') => {
     if (!this.grid.isWhite(r, c) && !this.props.editMode) return;
+    if (this.props.grid[r][c].isImage) return;
     if (dir !== this.props.direction) {
       this.props.onChangeDirection();
     }
@@ -160,6 +168,7 @@ export default class ListView extends React.PureComponent<ListViewProps> {
           referenced: false,
           circled: this.isCircled(r, c),
           shaded: this.isShaded(r, c),
+          image: this.getImage(r, c),
           canFlipColor: !!this.props.canFlipColor?.(r, c),
           cursors: (this.props.cursors || []).filter((cursor) => cursor.r === r && cursor.c === c),
           pings: (this.props.pings || []).filter((ping) => ping.r === r && ping.c === c),

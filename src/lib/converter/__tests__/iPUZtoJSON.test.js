@@ -187,6 +187,44 @@ describe('iPUZtoJSON', () => {
     expect(result.shades).toEqual([]);
   });
 
+  describe('image background cells', () => {
+    it('extracts imagebg from cell styles', () => {
+      const ipuz = makeMinimalIPUZ({
+        puzzle: [
+          [{cell: 1}, {cell: 2, style: {imagebg: 'data:image/png;base64,abc123'}}],
+          [{cell: 3}, '#'],
+        ],
+        solution: [
+          ['A', ' '],
+          ['C', null],
+        ],
+      });
+      const result = iPUZtoJSON(makeBuffer(ipuz));
+      expect(result.images).toBeDefined();
+      expect(result.images[1]).toBe('data:image/png;base64,abc123');
+    });
+
+    it('converts space solution cells to empty strings (not black)', () => {
+      const ipuz = makeMinimalIPUZ({
+        puzzle: [
+          [{cell: 1}, {cell: 2, style: {imagebg: 'data:image/png;base64,abc123'}}],
+          [{cell: 3}, '#'],
+        ],
+        solution: [
+          ['A', ' '],
+          ['C', null],
+        ],
+      });
+      const result = iPUZtoJSON(makeBuffer(ipuz));
+      expect(result.grid[0][1]).toBe('');
+    });
+
+    it('omits images when no imagebg cells exist', () => {
+      const result = iPUZtoJSON(makeBuffer(makeMinimalIPUZ()));
+      expect(result.images).toBeUndefined();
+    });
+  });
+
   describe('missing solution field (contest puzzle)', () => {
     it('does not crash when solution is missing', () => {
       const ipuz = makeMinimalIPUZ();

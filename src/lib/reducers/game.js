@@ -44,6 +44,7 @@ const reducers = {
       solution = [['']],
       circles = [],
       shades = [],
+      images = {},
       chat = {messages: []},
       clues = {},
       clock = {
@@ -70,6 +71,7 @@ const reducers = {
       solution,
       circles,
       shades,
+      images,
       chat,
       clues,
       clock,

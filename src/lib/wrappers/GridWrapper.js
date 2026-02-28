@@ -90,7 +90,7 @@ export default class GridWrapper {
 
   isGridFilled() {
     for (const cell of this.values()) {
-      if (!cell.black && cell.value === '') {
+      if (!cell.black && !cell.isImage && cell.value === '') {
         return false;
       }
     }
@@ -295,7 +295,7 @@ export default class GridWrapper {
   }
 
   isFilled(r, c) {
-    return this.grid[r][c].value !== '';
+    return this.grid[r][c].value !== '' || !!this.grid[r][c].isImage;
   }
 
   isWhite(r, c) {

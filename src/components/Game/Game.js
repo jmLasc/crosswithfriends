@@ -297,8 +297,19 @@ export default class Game extends Component {
       return <div>Loading...</div>;
     }
 
-    const {grid, circles, shades, cursors, pings, users, solved, solution, themeColor, optimisticCounter} =
-      this.game;
+    const {
+      grid,
+      circles,
+      shades,
+      images,
+      cursors,
+      pings,
+      users,
+      solved,
+      solution,
+      themeColor,
+      optimisticCounter,
+    } = this.game;
     const clues = {
       ...this.game.clues,
     };
@@ -343,6 +354,7 @@ export default class Game extends Component {
         opponentGrid={opponentGrid}
         circles={circles}
         shades={shades}
+        images={images}
         clues={{
           across: toArr(clues.across),
           down: toArr(clues.down),

@@ -210,3 +210,13 @@ div:focus .cell.referenced {
   background-color: rgba(0, 0, 0, 0.3);
   z-index: 10;
 }
+
+.cell--image--bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 10;
+}

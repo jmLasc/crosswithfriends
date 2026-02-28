@@ -74,9 +74,16 @@ export async function addGameEvent(gid: string, event: GameEvent) {
 export async function addInitialGameEvent(gid: string, pid: string) {
   const puzzle = await getPuzzle(pid);
   console.log('got puzzle', puzzle);
-  const {info = {}, grid: solution = [['']], circles = [], shades = [], contest = false} = puzzle;
+  const {
+    info = {},
+    grid: solution = [['']],
+    circles = [],
+    shades = [],
+    images = {},
+    contest = false,
+  } = puzzle;
 
-  const gridObject = makeGrid(solution);
+  const gridObject = makeGrid(solution, images);
   const clues = gridObject.alignClues(puzzle.clues);
   const grid = gridObject.toArray();
 
@@ -93,6 +100,7 @@ export async function addInitialGameEvent(gid: string, pid: string) {
         solution,
         circles,
         shades,
+        ...(Object.keys(images).length > 0 ? {images} : {}),
         ...(contest ? {contest} : {}),
         chat: {messages: []},
         cursor: {},

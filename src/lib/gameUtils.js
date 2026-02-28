@@ -38,14 +38,19 @@ export const makeEmptyGame = () => ({
   circles: [],
 });
 
-export const makeGrid = (textGrid, fillWithSol) => {
-  const newGridArray = textGrid.map((row) =>
-    row.map((cell) => ({
-      black: cell === '.',
-      edits: [],
-      value: fillWithSol ? cell : '',
-      number: null,
-    }))
+export const makeGrid = (textGrid, fillWithSol, images) => {
+  const cols = textGrid[0]?.length ?? 0;
+  const newGridArray = textGrid.map((row, r) =>
+    row.map((cell, c) => {
+      const flatIdx = r * cols + c;
+      return {
+        black: cell === '.',
+        edits: [],
+        value: fillWithSol ? cell : '',
+        number: null,
+        ...(images && images[flatIdx] ? {isImage: true} : {}),
+      };
+    })
   );
   const grid = new GridWrapper(newGridArray);
   grid.assignNumbers();

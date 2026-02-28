@@ -28,6 +28,7 @@ export default function iPUZtoJSON(readerResult) {
       // Unwrap object-wrapped cells (e.g. {cell: '#'}, {cell: 1, style: ...})
       const cell = typeof rawCell === 'object' && rawCell !== null ? rawCell.cell : rawCell;
       if (cell === null || cell === '#') return '.';
+      if (cell === ' ') return ''; // image/decorative cells — white but non-typeable
       if (!hasSolution) return ''; // no solution — white cells are empty
       return cell;
     })
@@ -40,15 +41,20 @@ export default function iPUZtoJSON(readerResult) {
   };
   const circles = [];
   const shades = [];
+  const images = {};
 
   jsonFromReader.puzzle.forEach((row, rowIndex) => {
     row.forEach((cell, cellIndex) => {
       if (typeof cell === 'object' && cell?.style) {
+        const flatIdx = rowIndex * row.length + cellIndex;
         if (cell.style.shapebg === 'circle') {
-          circles.push(rowIndex * row.length + cellIndex);
+          circles.push(flatIdx);
         }
         if (cell.style.color || cell.style.highlight) {
-          shades.push(rowIndex * row.length + cellIndex);
+          shades.push(flatIdx);
+        }
+        if (cell.style.imagebg) {
+          images[flatIdx] = cell.style.imagebg;
         }
       }
     });
@@ -70,6 +76,7 @@ export default function iPUZtoJSON(readerResult) {
     info,
     circles,
     shades,
+    ...(Object.keys(images).length > 0 ? {images} : {}),
     across,
     down,
     contest,

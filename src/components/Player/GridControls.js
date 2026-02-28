@@ -98,7 +98,11 @@ export default class GridControls extends Component {
   }
 
   isSelectable(r, c) {
-    return (this.props.editMode || this.grid.isWhite(r, c)) && !this.props.grid[r][c].isHidden;
+    return (
+      (this.props.editMode || this.grid.isWhite(r, c)) &&
+      !this.props.grid[r][c].isHidden &&
+      !this.props.grid[r][c].isImage
+    );
   }
 
   isClueSelectable(direction, clueNumber) {
@@ -401,7 +405,7 @@ export default class GridControls extends Component {
         c--;
       }
     };
-    const ok = () => this.grid.isInBounds(r, c) && this.grid.isWhite(r, c);
+    const ok = () => this.grid.isInBounds(r, c) && this.grid.isWhite(r, c) && !this.props.grid[r][c].isImage;
     step();
     safe_while(() => this.grid.isInBounds(r, c) && !ok(), step);
     if (ok()) {
@@ -415,6 +419,9 @@ export default class GridControls extends Component {
     const {r, c} = this.props.selected;
     if (!this.isSelectable(r, c)) {
       return undefined; // don't type in hidden/non-selectable cells
+    }
+    if (this.props.grid[r][c].isImage) {
+      return undefined; // don't type in image cells
     }
     if (this.props.beta) {
       this.typeLetterSync(letter, isRebus, {nextClueIfFilled});
@@ -451,6 +458,7 @@ export default class GridControls extends Component {
   // Returns true if the letter was successfully deleted
   delete() {
     const {r, c} = this.props.selected;
+    if (this.props.grid[r][c].isImage) return false;
     if (this.props.grid[r][c].value !== '' && !this.props.grid[r][c].good) {
       this.props.updateGrid(r, c, '');
       return true;

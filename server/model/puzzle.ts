@@ -191,6 +191,7 @@ const puzzleValidator = Joi.object({
   }),
   circles: Joi.array().optional(),
   shades: Joi.array().optional(),
+  images: Joi.object().pattern(Joi.number(), Joi.string()).optional(),
   clues: Joi.object({
     across: Joi.array(),
     down: Joi.array(),

@@ -74,12 +74,13 @@ function convertPUZ(buffer) {
 }
 
 function convertIPUZ(readerResult) {
-  const {grid, info, circles, shades, across, down, contest} = iPUZtoJSON(readerResult);
+  const {grid, info, circles, shades, images, across, down, contest} = iPUZtoJSON(readerResult);
 
   const result = {
     grid,
     circles,
     shades,
+    ...(images && Object.keys(images).length > 0 ? {images} : {}),
     info,
     clues: {across, down},
     ...(contest ? {contest} : {}),

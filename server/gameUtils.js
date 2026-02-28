@@ -96,7 +96,7 @@ export class GridWrapper {
 
   isGridFilled() {
     for (const cell of this.values()) {
-      if (!cell.black && cell.value === '') {
+      if (!cell.black && !cell.isImage && cell.value === '') {
         return false;
       }
     }
@@ -268,7 +268,7 @@ export class GridWrapper {
   }
 
   isFilled(r, c) {
-    return this.grid[r][c].value !== '';
+    return this.grid[r][c].value !== '' || !!this.grid[r][c].isImage;
   }
 
   isWhite(r, c) {
@@ -372,14 +372,19 @@ export class GridWrapper {
   }
 }
 
-export const makeGrid = (textGrid) => {
-  const newGridArray = textGrid.map((row) =>
-    row.map((cell) => ({
-      black: cell === '.',
-      edits: [],
-      value: '',
-      number: null,
-    }))
+export const makeGrid = (textGrid, images) => {
+  const cols = textGrid[0]?.length ?? 0;
+  const newGridArray = textGrid.map((row, r) =>
+    row.map((cell, c) => {
+      const flatIdx = r * cols + c;
+      return {
+        black: cell === '.',
+        edits: [],
+        value: '',
+        number: null,
+        ...(images && images[flatIdx] ? {isImage: true} : {}),
+      };
+    })
   );
   const grid = new GridWrapper(newGridArray);
   grid.assignNumbers();

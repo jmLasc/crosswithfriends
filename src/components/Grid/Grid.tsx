@@ -22,6 +22,7 @@ export interface GridProps {
   // Cell annotations
   circles?: CellIndex[];
   shades?: CellIndex[];
+  images?: Record<number, string>;
   pings?: Ping[];
   cursors: Cursor[];
 
@@ -84,6 +85,13 @@ export default class Grid extends React.PureComponent<GridProps> {
     return (shades || []).indexOf(idx) !== -1 || this.isDoneByOpponent(r, c);
   }
 
+  getImage(r: number, c: number): string | undefined {
+    const {grid, images} = this.props;
+    if (!images) return undefined;
+    const idx = toCellIndex(r, c, grid[0].length);
+    return images[idx];
+  }
+
   isHighlighted(r: number, c: number) {
     if (!this.selectedIsWhite) return false;
     const {selected, direction} = this.props;
@@ -111,6 +119,7 @@ export default class Grid extends React.PureComponent<GridProps> {
 
   handleClick = (r: number, c: number) => {
     if (!this.grid.isWhite(r, c) && !this.props.editMode) return;
+    if (this.props.grid[r][c].isImage) return;
     if (this.isSelected(r, c)) {
       this.props.onChangeDirection();
     } else {
@@ -156,6 +165,7 @@ export default class Grid extends React.PureComponent<GridProps> {
         referenced: this.isReferenced(r, c),
         circled: this.isCircled(r, c),
         shaded: this.isShaded(r, c),
+        image: this.getImage(r, c),
         canFlipColor: !!this.props.canFlipColor?.(r, c),
         cursors: (this.props.cursors || []).filter((cursor) => cursor.r === r && cursor.c === c),
         pings: (this.props.pings || []).filter((ping) => ping.r === r && ping.c === c),
