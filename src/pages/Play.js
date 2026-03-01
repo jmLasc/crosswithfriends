@@ -29,6 +29,7 @@ class Play extends Component {
       abandonGid: null,
     };
     this._handleNewGame = this.create.bind(this);
+    this._handleNewFencingGame = this.createFencing.bind(this);
     this._handleAbandonClick = this.handleAbandonClick.bind(this);
     this._handleAbandonConfirm = this.confirmAbandon.bind(this);
     this._handleAbandonClose = this.closeAbandon.bind(this);
@@ -122,6 +123,19 @@ class Play extends Component {
         v2: true,
       });
       redirect(this.is_fencing ? `/fencing/${gid}` : `/beta/game/${gid}`);
+    });
+  }
+
+  createFencing() {
+    this.setState({creating: true});
+    actions.getNextGid(async (gid) => {
+      await createGame({gid, pid: this.pid});
+      await this.user.joinGame(gid, {
+        pid: this.pid,
+        solved: false,
+        v2: true,
+      });
+      redirect(`/fencing/${gid}`);
     });
   }
 
@@ -220,9 +234,14 @@ class Play extends Component {
             })}
           </tbody>
         </table>
-        <button className="btn btn--contained btn--primary" onClick={this._handleNewGame}>
-          Start a new game
-        </button>
+        <div className="play--actions">
+          <button className="btn btn--contained btn--primary" onClick={this._handleNewGame}>
+            Start a new game
+          </button>
+          <button className="btn btn--contained" onClick={this._handleNewFencingGame}>
+            Start Fencing Game
+          </button>
+        </div>
       </div>
     );
   }

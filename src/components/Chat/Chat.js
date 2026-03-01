@@ -176,7 +176,11 @@ export default class Chat extends Component {
     const fencingPlayers = this.props.game.fencingUsers?.length ?? 0;
     return (
       <div>
-        {!isFencing && !!fencingPlayers && <a href={fencingUrl}>Join Fencing ({fencingPlayers} joined)</a>}
+        {!isFencing && !!fencingPlayers && (
+          <a href={fencingUrl} className="fencing--join-link">
+            Join Fencing ({fencingPlayers} joined)
+          </a>
+        )}
         {!isFencing && !fencingPlayers && (
           <a href={fencingUrl} style={{opacity: 0.1, textDecoration: 'none'}}>
             X

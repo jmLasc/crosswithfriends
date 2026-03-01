@@ -191,12 +191,22 @@
   }
 }
 
-/* Fencing leave link */
+/* Fencing links */
 .fencing--leave-link {
   font-size: 13px;
   color: var(--main-blue);
 }
 
+.fencing--join-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--main-blue);
+}
+
 .dark .fencing--leave-link {
+  color: #6aa9f4;
+}
+
+.dark .fencing--join-link {
   color: #6aa9f4;
 }

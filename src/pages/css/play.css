@@ -71,6 +71,11 @@
   background-color: rgb(211 47 47 / 8%);
 }
 
+.play--actions {
+  display: flex;
+  gap: 8px;
+}
+
 /* Dark mode */
 .dark .play--title {
   color: var(--dark-primary-text);
