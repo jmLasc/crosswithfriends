@@ -1,6 +1,7 @@
 import './css/profile.css';
+import './css/play.css';
 
-import {useContext, useState, useEffect} from 'react';
+import {useContext, useState, useEffect, useCallback} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {useParams, useNavigate, Link} from 'react-router-dom';
 
@@ -8,8 +9,10 @@ import {MdPeople} from 'react-icons/md';
 import {FaPlay} from 'react-icons/fa';
 import Nav from '../components/common/Nav';
 import Footer from '../components/common/Footer';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 import AuthContext from '../lib/AuthContext';
 import {getUserStats} from '../api/user_stats';
+import {dismissGame} from '../api/create_game';
 import {formatMilliseconds} from '../components/Toolbar/Clock';
 
 function formatTime(ms) {
@@ -152,7 +155,7 @@ function HistoryTable({history}) {
   );
 }
 
-function InProgressTable({inProgress}) {
+function InProgressTable({inProgress, onRemove}) {
   if (!inProgress || inProgress.length === 0) return null;
 
   return (
@@ -165,6 +168,7 @@ function InProgressTable({inProgress}) {
             <th>Size</th>
             <th>Last Played</th>
             <th>Resume</th>
+            {onRemove && <th />}
           </tr>
         </thead>
         <tbody>
@@ -182,6 +186,18 @@ function InProgressTable({inProgress}) {
                   <FaPlay size={10} />
                 </Link>
               </td>
+              {onRemove && (
+                <td>
+                  <button
+                    className="play--abandon"
+                    title="Remove this game"
+                    data-gid={item.gid}
+                    onClick={onRemove}
+                  >
+                    &times;
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -235,6 +251,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [dismissGid, setDismissGid] = useState(null);
 
   // If visiting /profile with no userId, redirect to own profile
   useEffect(() => {
@@ -273,6 +290,24 @@ export default function Profile() {
   }, [targetUserId, accessToken]);
 
   const isOwnProfile = isAuthenticated && user?.id === targetUserId;
+
+  const handleDismissClick = useCallback((e) => {
+    setDismissGid(e.currentTarget.dataset.gid);
+  }, []);
+
+  const handleDismissClose = useCallback(() => {
+    setDismissGid(null);
+  }, []);
+
+  const handleDismissConfirm = useCallback(async () => {
+    if (!dismissGid || !accessToken) return;
+    await dismissGame(dismissGid, accessToken);
+    setData((prev) => ({
+      ...prev,
+      inProgress: prev.inProgress?.filter((g) => g.gid !== dismissGid),
+    }));
+    setDismissGid(null);
+  }, [dismissGid, accessToken]);
 
   return (
     <div className="profile">
@@ -329,7 +364,10 @@ export default function Profile() {
             ) : (
               <>
                 {data.stats.totalSolved > 0 && <StatsCards stats={data.stats} />}
-                <InProgressTable inProgress={data.inProgress} />
+                <InProgressTable
+                  inProgress={data.inProgress}
+                  onRemove={isOwnProfile ? handleDismissClick : null}
+                />
                 <HistoryTable history={data.history} />
                 <UploadsTable uploads={data.uploads} />
               </>
@@ -338,6 +376,16 @@ export default function Profile() {
         )}
       </div>
       <Footer />
+      <ConfirmDialog
+        open={!!dismissGid}
+        onOpenChange={handleDismissClose}
+        title="Remove game?"
+        confirmLabel="Remove"
+        danger
+        onConfirm={handleDismissConfirm}
+      >
+        This will remove the game from your list. You can rejoin later if you have the link.
+      </ConfirmDialog>
     </div>
   );
 }

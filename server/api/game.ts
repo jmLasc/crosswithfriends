@@ -4,6 +4,8 @@ import {CreateGameResponse, CreateGameRequest, InfoJson, GetGameResponse} from '
 import {addInitialGameEvent} from '../model/game';
 import {getPuzzleSolves} from '../model/puzzle_solve';
 import {getPuzzleInfo} from '../model/puzzle';
+import {verifyAccessToken} from '../auth/jwt';
+import {dismissGameForUser, undismissGameForUser} from '../model/game_dismissal';
 
 const router = express.Router();
 
@@ -39,6 +41,46 @@ router.get<{gid: string}, GetGameResponse>('/:gid', async (req, res) => {
   } catch (error) {
     console.error('Error fetching game state:', error);
     res.sendStatus(500);
+  }
+  return undefined;
+});
+
+router.post<{gid: string}>('/:gid/dismiss', async (req, res, next) => {
+  try {
+    const {gid} = req.params;
+
+    // Require auth
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.sendStatus(401);
+    }
+    const payload = verifyAccessToken(authHeader.slice(7));
+    if (!payload) return res.sendStatus(401);
+
+    // Per-user dismissal — only hides the game for this user
+    await dismissGameForUser(payload.userId, gid);
+    res.sendStatus(204);
+  } catch (e) {
+    next(e);
+  }
+  return undefined;
+});
+
+router.post<{gid: string}>('/:gid/undismiss', async (req, res, next) => {
+  try {
+    const {gid} = req.params;
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.sendStatus(401);
+    }
+    const payload = verifyAccessToken(authHeader.slice(7));
+    if (!payload) return res.sendStatus(401);
+
+    await undismissGameForUser(payload.userId, gid);
+    res.sendStatus(204);
+  } catch (e) {
+    next(e);
   }
   return undefined;
 });

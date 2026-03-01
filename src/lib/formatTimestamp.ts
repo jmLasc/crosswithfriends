@@ -1,5 +1,5 @@
-export function formatTimestamp(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleDateString(undefined, {
+export function formatTimestamp(millis: number): string {
+  return new Date(millis).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

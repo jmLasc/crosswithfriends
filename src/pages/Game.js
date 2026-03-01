@@ -19,6 +19,7 @@ import * as powerupLib from '../lib/powerups';
 import {recordSolve} from '../api/puzzle.ts';
 import AuthContext from '../lib/AuthContext';
 import {SERVER_URL} from '../api/constants';
+import {undismissGame} from '../api/create_game.ts';
 
 import nameGenerator from '../lib/nameGenerator';
 
@@ -132,6 +133,11 @@ class Game extends Component {
       }
       if (this._connectionTimer) clearTimeout(this._connectionTimer);
       this.setState({connectionFailed: false});
+      // Re-add to Firebase history so the game appears on the Play page
+      const pid = event.params?.pid;
+      if (pid) {
+        this.user.joinGame(this.state.gid, {pid, solved: !!event.params?.game?.solved, v2: true});
+      }
       this.handleUpdate();
     });
     this.gameModel.on('wsEvent', (event) => {
@@ -231,6 +237,15 @@ class Game extends Component {
   componentDidMount() {
     this.initializeGame();
     this.handleUpdateDisplayName(this.user.id, this.initialUsername);
+    this.maybeUndismiss();
+  }
+
+  maybeUndismiss() {
+    const accessToken = this.context?.accessToken;
+    if (accessToken && this.state.gid) {
+      undismissGame(this.state.gid, accessToken).catch((e) => console.error('undismiss failed:', e));
+      this._undismissed = true;
+    }
   }
 
   componentWillUnmount() {
@@ -242,6 +257,9 @@ class Game extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.gid !== this.state.gid) {
       this.initializeGame();
+    }
+    if (!this._undismissed) {
+      this.maybeUndismiss();
     }
     if (prevState.winner !== this.state.winner && this.state.winner) {
       const {winner, startedAt, players} = this.state;

@@ -1,7 +1,7 @@
 import {AddPuzzleResponse, AddPuzzleRequest} from '@shared/types';
 import express from 'express';
 
-import {addPuzzle} from '../model/puzzle';
+import {addPuzzle, getPuzzleInfo} from '../model/puzzle';
 import {verifyAccessToken} from '../auth/jwt';
 
 const router = express.Router();
@@ -22,6 +22,15 @@ router.post<{}, AddPuzzleResponse, AddPuzzleRequest>('/', async (req, res) => {
     pid: result.pid,
     duplicate: result.duplicate || undefined,
   });
+});
+
+router.get<{pid: string}>('/:pid/info', async (req, res, next) => {
+  try {
+    const info = await getPuzzleInfo(req.params.pid);
+    res.json(info);
+  } catch (e) {
+    next(e);
+  }
 });
 
 export default router;

@@ -83,7 +83,7 @@ class Replays extends Component {
       const events = _.values(rawGame.events);
       const historyWrapper = new HistoryWrapper(events);
       const game = historyWrapper.getSnapshot();
-      const startTime = historyWrapper.createEvent.timestamp / 1000;
+      const startTime = historyWrapper.createEvent.timestamp;
       return {
         gid,
         pid: game.pid,
@@ -101,7 +101,7 @@ class Replays extends Component {
       pid: rawGame.pid,
       v2: false,
       solved: rawGame.solved,
-      startTime: rawGame.startTime / 1000,
+      startTime: rawGame.startTime,
       time: getTime(rawGame),
       chatters: getChatters(rawGame),
       active: true,

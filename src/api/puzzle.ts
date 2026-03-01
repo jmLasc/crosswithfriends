@@ -1,5 +1,11 @@
 import {SERVER_URL} from './constants';
-import {AddPuzzleRequest, AddPuzzleResponse, RecordSolveRequest, RecordSolveResponse} from '../shared/types';
+import {
+  AddPuzzleRequest,
+  AddPuzzleResponse,
+  InfoJson,
+  RecordSolveRequest,
+  RecordSolveResponse,
+} from '../shared/types';
 
 export async function createNewPuzzle(
   puzzle: AddPuzzleRequest,
@@ -23,6 +29,11 @@ export async function createNewPuzzle(
     headers,
     body: JSON.stringify(data),
   });
+  return resp.json();
+}
+
+export async function fetchPuzzleInfo(pid: number): Promise<InfoJson> {
+  const resp = await fetch(`${SERVER_URL}/api/puzzle/${pid}/info`);
   return resp.json();
 }
 

@@ -75,6 +75,10 @@ export default class User extends EventEmitter {
     });
   }
 
+  removeGame(gid) {
+    return this.ref.child('history').child(gid).remove();
+  }
+
   markSolved(gid) {
     this.ref
       .child('history')
