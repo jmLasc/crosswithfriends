@@ -36,7 +36,7 @@ class Play extends Component {
     this.user = getUser();
     this.user.onAuth(() => {
       this.user.listUserHistory().then((userHistory) => {
-        this.setState({userHistory});
+        this.setState({userHistory: userHistory || {}});
       });
     });
 

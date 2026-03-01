@@ -69,3 +69,8 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- 10. game_snapshots (no dependencies)
 -- ============================================================
 \ir create_game_snapshots.sql
+
+-- ============================================================
+-- 11. game_dismissals (depends on users)
+-- ============================================================
+\ir create_game_dismissals.sql

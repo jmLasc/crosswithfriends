@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS game_dismissals (
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  gid TEXT NOT NULL,
+  dismissed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, gid)
+);

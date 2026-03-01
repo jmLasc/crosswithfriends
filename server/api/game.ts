@@ -4,9 +4,8 @@ import {CreateGameResponse, CreateGameRequest, InfoJson, GetGameResponse} from '
 import {addInitialGameEvent} from '../model/game';
 import {getPuzzleSolves} from '../model/puzzle_solve';
 import {getPuzzleInfo} from '../model/puzzle';
-import {saveGameSnapshot, getGameSnapshot} from '../model/game_snapshot';
 import {verifyAccessToken} from '../auth/jwt';
-import {pool} from '../model/pool';
+import {dismissGameForUser} from '../model/game_dismissal';
 
 const router = express.Router();
 
@@ -58,19 +57,8 @@ router.post<{gid: string}>('/:gid/dismiss', async (req, res, next) => {
     const payload = verifyAccessToken(authHeader.slice(7));
     if (!payload) return res.sendStatus(401);
 
-    // Don't overwrite an existing snapshot
-    const existing = await getGameSnapshot(gid);
-    if (existing) return res.sendStatus(409);
-
-    // Look up pid from the create event
-    const result = await pool.query(
-      `SELECT event_payload->'params'->>'pid' AS pid FROM game_events WHERE gid = $1 AND event_type = 'create'`,
-      [gid]
-    );
-    if (result.rows.length === 0) return res.sendStatus(404);
-
-    const pid = result.rows[0].pid;
-    await saveGameSnapshot(gid, pid, {dismissed: true});
+    // Per-user dismissal — only hides the game for this user
+    await dismissGameForUser(payload.userId, gid);
     res.sendStatus(204);
   } catch (e) {
     next(e);

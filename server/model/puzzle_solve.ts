@@ -180,6 +180,7 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
   // Find in-progress games:
   // - UNION of uid-based and payload-based lookups (each uses its own index)
   // - Exclude solved games via NOT EXISTS on game_snapshots (PK lookup)
+  // - Exclude user-dismissed games via NOT EXISTS on game_dismissals
   // - Join create event for pid, join puzzles for title and size
   const result = await pool.query(
     `WITH user_games AS (
@@ -191,6 +192,9 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
        ) all_events
        WHERE NOT EXISTS (
          SELECT 1 FROM game_snapshots gs WHERE gs.gid = all_events.gid
+       )
+       AND NOT EXISTS (
+         SELECT 1 FROM game_dismissals gd WHERE gd.gid = all_events.gid AND gd.user_id = $2
        )
        GROUP BY gid
        ORDER BY last_activity DESC
@@ -209,7 +213,7 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
      JOIN game_events ce ON ce.gid = ug.gid AND ce.event_type = 'create'
      JOIN puzzles p ON p.pid = (ce.event_payload->'params'->>'pid')
      ORDER BY ug.last_activity DESC`,
-    [dfacIds]
+    [dfacIds, userId]
   );
 
   const ms = Date.now() - startTime;
