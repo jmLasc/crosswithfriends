@@ -43,7 +43,7 @@ class Play extends Component {
     });
 
     fetchPuzzleInfo(this.pid).then((info) => {
-      this.setState({puzzleInfo: info});
+      if (info) this.setState({puzzleInfo: info});
     });
 
     if (this.query.mode === 'battle') {
