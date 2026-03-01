@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import {
   isSetGameEvent,
   isUserPingRoomEvent,
@@ -62,6 +63,7 @@ export const roomReducer = (room: RoomState, event: RoomEvent): RoomState => {
     console.error('event', event.type, 'not found');
     return room;
   } catch (_e) {
+    Sentry.captureException(_e);
     console.error('Error handling event', event);
     return room;
   }

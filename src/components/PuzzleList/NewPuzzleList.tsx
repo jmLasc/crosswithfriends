@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import _ from 'lodash';
 import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import {PuzzleJson, PuzzleStatsJson, ListPuzzleRequestFilters} from '../../shared/types';
@@ -103,7 +104,7 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
           setPage(currentPage + 1);
           setFullyLoaded(_.size(nextPage.puzzles) < pageSize);
         } catch (err) {
-          console.error('Failed to fetch puzzles:', err);
+          Sentry.captureException(err);
           setError(
             import.meta.env.VITE_MAINTENANCE_MESSAGE ||
               'Cross with Friends backend is currently unavailable. Please try again later.'

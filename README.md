@@ -10,6 +10,7 @@ Hosted at [crosswithfriends.com](https://www.crosswithfriends.com).
 - **Backend:** Express, Socket.IO (real-time gameplay), PostgreSQL
 - **Auth:** Google OAuth, email/password with JWT sessions
 - **Infrastructure:** Render (hosting + managed Postgres)
+- **Monitoring:** Sentry (error tracking, performance, session replay)
 - **CI:** GitHub Actions (ESLint, Prettier, TypeCheck, Tests, Build)
 
 ## Recent Changes

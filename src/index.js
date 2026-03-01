@@ -1,3 +1,19 @@
+import * as Sentry from '@sentry/react';
+
+Sentry.init({
+  dsn: 'https://23cecf9d531c1782fd0c8135f4e3d46e@o4510963953041408.ingest.us.sentry.io/4510963968311296',
+  sendDefaultPii: true,
+  enableLogs: true,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+    Sentry.consoleLoggingIntegration({levels: ['log', 'warn', 'error']}),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
+
 import classnames from 'classnames';
 import {createRoot} from 'react-dom/client';
 import React from 'react';

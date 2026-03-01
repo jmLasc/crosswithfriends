@@ -1,3 +1,5 @@
+import './instrument';
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
@@ -74,6 +76,8 @@ if (process.env.SERVE_STATIC) {
 
 // ======== Error Handling Middleware ==========
 
+Sentry.setupExpressErrorHandler(app);
+
 app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const status = err.statusCode || 500;
   console.error(`[API Error] ${req.method} ${req.path}:`, err.message || err);
@@ -121,6 +125,7 @@ async function runServer() {
         const deletedReset = await cleanupExpiredResetTokens();
         if (deletedReset > 0) console.log(`Cleaned up ${deletedReset} expired password reset tokens`);
       } catch (err) {
+        Sentry.captureException(err);
         console.error('Token cleanup error:', err);
       }
     },

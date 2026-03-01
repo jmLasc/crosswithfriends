@@ -1,4 +1,5 @@
 /* eslint-disable no-nested-ternary, class-methods-use-this, consistent-return, react/jsx-no-bind */
+import * as Sentry from '@sentry/react';
 import {Component} from 'react';
 import _ from 'lodash';
 import querystring from 'querystring';
@@ -243,7 +244,10 @@ class Game extends Component {
   maybeUndismiss() {
     const accessToken = this.context?.accessToken;
     if (accessToken && this.state.gid) {
-      undismissGame(this.state.gid, accessToken).catch((e) => console.error('undismiss failed:', e));
+      undismissGame(this.state.gid, accessToken).catch((e) => {
+        Sentry.captureException(e);
+        console.error('undismiss failed:', e);
+      });
       this._undismissed = true;
     }
   }
@@ -444,6 +448,7 @@ class Game extends Component {
         this.setState({savingReplay: false});
       }
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Failed to save replay:', e);
       this.setState({savingReplay: false});
     }

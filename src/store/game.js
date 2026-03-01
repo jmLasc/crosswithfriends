@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import * as Sentry from '@sentry/react';
 import EventEmitter from 'events';
 import _ from 'lodash';
 import * as uuid from 'uuid';
@@ -130,6 +131,7 @@ export default class Game extends EventEmitter {
       }
     }
     // all retries exhausted — freeze input, let socket.io keep trying to reconnect
+    Sentry.captureException(new Error('Event delivery failed after all retries'));
     console.error('Event delivery failed after all retries');
     this.setSyncState('failed');
   }

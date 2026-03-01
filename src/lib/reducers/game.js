@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import _ from 'lodash';
 import {MAX_CLOCK_INCREMENT} from '../timing';
 import {MAIN_BLUE_3} from '../colors';
@@ -404,6 +405,7 @@ export const reduce = (game, action, options = {}) => {
       result = tick(result, timestamp, isPause);
     }
   } catch (_e) {
+    Sentry.captureException(_e);
     console.error('Error handling action', action);
   }
   return result;

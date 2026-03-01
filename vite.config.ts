@@ -2,6 +2,7 @@ import {defineConfig, transformWithEsbuild} from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {VitePWA} from 'vite-plugin-pwa';
+import {sentryVitePlugin} from '@sentry/vite-plugin';
 
 export default defineConfig({
   plugins: [
@@ -44,6 +45,16 @@ export default defineConfig({
         start_url: '.',
       },
     }),
+    // Source map uploads only run when SENTRY_AUTH_TOKEN is set (CI/deployment)
+    ...(process.env.SENTRY_AUTH_TOKEN
+      ? [
+          sentryVitePlugin({
+            org: 'cross-with-friends',
+            project: 'javascript-react',
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+          }),
+        ]
+      : []),
   ],
   resolve: {
     alias: {
@@ -70,7 +81,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: false,
+    sourcemap: 'hidden',
   },
   define: {
     // Bridge: partyParrot.js has 108 occurrences of process.env.PUBLIC_URL

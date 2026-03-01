@@ -85,6 +85,38 @@ All of these must pass before merging to master:
 - **Pre-commit hook**: lint-staged runs ESLint + Prettier on staged JS/TS files, and Stylelint + Prettier on staged CSS files.
 - **Package manager**: pnpm (managed via corepack). Run `corepack enable` once, then use `pnpm install`.
 
+## Error Tracking (Sentry)
+
+**Frontend** uses `@sentry/react` for error tracking, performance tracing, session replay, and structured logging. Initialized in `src/index.js` before all other imports.
+
+**Capturing errors**: Use `Sentry.captureException(error)` in catch blocks to report errors as Sentry Issues. The `consoleLoggingIntegration` also captures `console.log`, `console.warn`, and `console.error` as Sentry logs automatically.
+
+**Structured logging**: Use `Sentry.logger` for structured logs:
+```js
+import * as Sentry from '@sentry/react';
+const {logger} = Sentry;
+logger.info('Updated profile', {profileId: 345});
+logger.error('Failed to process payment', {orderId: 'order_123'});
+logger.debug(logger.fmt`Cache miss for user: ${userId}`);
+```
+
+**Custom spans**: Use `Sentry.startSpan()` for performance instrumentation:
+```js
+Sentry.startSpan({op: 'http.client', name: 'GET /api/users'}, async () => {
+  const response = await fetch('/api/users');
+  return response.json();
+});
+```
+
+**Backend** uses `@sentry/node` for error tracking. Initialized via `server/instrument.ts` which is imported at the top of `server/server.ts`. `Sentry.setupExpressErrorHandler(app)` is registered before the custom error middleware so all unhandled errors are captured automatically.
+
+**Backend error capture**: Use `Sentry.captureException(error)` in catch blocks. Import from `@sentry/node`:
+```ts
+import * as Sentry from '@sentry/node';
+```
+
+**Source maps**: The `@sentry/vite-plugin` in `vite.config.ts` uploads frontend source maps during `pnpm build` when `SENTRY_AUTH_TOKEN` is set. No token needed for local development.
+
 ## Deployment
 
 - **Frontend**: Render Static Site with `/api/*` rewrite proxying to backend (same-origin API calls)

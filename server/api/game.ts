@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import {CreateGameResponse, CreateGameRequest, InfoJson, GetGameResponse} from '../../src/shared/types';
 
@@ -39,6 +40,7 @@ router.get<{gid: string}, GetGameResponse>('/:gid', async (req, res) => {
       size: gameState.size,
     });
   } catch (error) {
+    Sentry.captureException(error);
     console.error('Error fetching game state:', error);
     res.sendStatus(500);
   }

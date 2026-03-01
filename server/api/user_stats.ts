@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import {getUserSolveStats, getInProgressGames} from '../model/puzzle_solve';
 import {getUserById} from '../model/user';
@@ -38,6 +39,7 @@ router.get('/:userId', async (req, res, next) => {
     try {
       uploads = await getUserUploadedPuzzles(userId);
     } catch (err) {
+      Sentry.captureException(err);
       console.error('getUserUploadedPuzzles error:', err);
     }
 
@@ -46,6 +48,7 @@ router.get('/:userId', async (req, res, next) => {
       try {
         inProgress = await getInProgressGames(userId);
       } catch (err) {
+        Sentry.captureException(err);
         console.error('getInProgressGames error:', err);
       }
     }

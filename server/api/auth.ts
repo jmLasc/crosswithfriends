@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import bcrypt from 'bcrypt';
 import express from 'express';
 import Joi from 'joi';
@@ -101,6 +102,7 @@ router.post('/signup', async (req, res, next) => {
     // Send verification email (non-blocking — don't fail signup if email fails)
     const verificationToken = await createVerificationToken(user.id);
     sendVerificationEmail(user.email!, verificationToken).catch((emailErr) => {
+      Sentry.captureException(emailErr);
       console.error('Failed to send verification email:', emailErr);
     });
 
@@ -597,6 +599,7 @@ router.post('/forgot-password', async (req, res, next) => {
     if (user && user.password_hash) {
       const token = await createPasswordResetToken(user.id);
       sendPasswordResetEmail(user.email!, token).catch((emailErr) => {
+        Sentry.captureException(emailErr);
         console.error('Failed to send password reset email:', emailErr);
       });
     }

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import './css/replay.css';
 import React, {Component} from 'react';
 import {Helmet} from 'react-helmet-async';
@@ -142,6 +143,7 @@ class Replay extends Component {
         this.setState({snapshotData: data});
       }
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Failed to fetch game snapshot:', e);
     }
   };
@@ -179,6 +181,7 @@ class Replay extends Component {
         this.setState({savingReplay: false});
       }
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Failed to save replay:', e);
       this.setState({savingReplay: false});
     }
