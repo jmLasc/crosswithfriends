@@ -128,6 +128,11 @@ class Game extends Component {
       this.historyWrapper.setCreateEvent(event);
       if (this._connectionTimer) clearTimeout(this._connectionTimer);
       this.setState({connectionFailed: false});
+      // Re-add to Firebase history so the game appears on the Play page
+      const pid = event.params?.pid;
+      if (pid) {
+        this.user.joinGame(this.state.gid, {pid, solved: !!event.params?.game?.solved, v2: true});
+      }
       this.handleUpdate();
     });
     this.gameModel.on('wsEvent', (event) => {
@@ -233,7 +238,7 @@ class Game extends Component {
   maybeUndismiss() {
     const accessToken = this.context?.accessToken;
     if (accessToken && this.state.gid) {
-      undismissGame(this.state.gid, accessToken);
+      undismissGame(this.state.gid, accessToken).catch((e) => console.error('undismiss failed:', e));
       this._undismissed = true;
     }
   }

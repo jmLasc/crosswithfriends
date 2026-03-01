@@ -12,12 +12,14 @@ import ConfirmDialog from '../components/common/ConfirmDialog';
 import actions from '../actions';
 import {getUser, BattleModel} from '../store';
 import redirect from '../lib/redirect';
-import {createGame} from '../api/create_game';
+import {createGame, dismissGame} from '../api/create_game';
 import {fetchPuzzleInfo} from '../api/puzzle';
+import AuthContext from '../lib/AuthContext';
 
 import withRouter from '../lib/withRouter';
 
 class Play extends Component {
+  static contextType = AuthContext;
   constructor() {
     super();
     this.state = {
@@ -134,9 +136,15 @@ class Play extends Component {
   async confirmAbandon() {
     const {abandonGid} = this.state;
     if (!abandonGid) return;
+    const accessToken = this.context?.accessToken;
+    if (accessToken) {
+      // Authenticated: use per-user Postgres dismissal (reversible)
+      await dismissGame(abandonGid, accessToken);
+    }
+    // Always remove from Firebase history so the Play page updates
     await this.user.removeGame(abandonGid);
     const userHistory = await this.user.listUserHistory();
-    this.setState({userHistory, abandonGid: null});
+    this.setState({userHistory: userHistory || {}, abandonGid: null});
   }
 
   createAndJoinBattle() {
