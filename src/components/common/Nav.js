@@ -201,10 +201,15 @@ function UserMenu() {
 export default function Nav({hidden, mobile, linkStyle, divRef}) {
   if (hidden) return null;
   const fencing = window.location.href.includes('fencing');
+  const cleanHome = fencing ? '/fencing' : '/';
+  const isHome = window.location.pathname === cleanHome;
+  // On the home page, link resets filters. Everywhere else, return to last filter state.
+  const storageKey = fencing ? 'cwf:homeUrl:fencing' : 'cwf:homeUrl';
+  const homePath = isHome ? cleanHome : sessionStorage.getItem(storageKey) || cleanHome;
   return (
     <div className={classnames('nav', {mobile})} ref={divRef}>
       <div className="nav--left" style={linkStyle}>
-        <Link to={fencing ? '/fencing' : '/'}>Cross with Friends</Link>
+        <Link to={homePath}>Cross with Friends</Link>
       </div>
       <div className="nav--right">
         <UserMenu />
