@@ -32,9 +32,14 @@ export async function createNewPuzzle(
   return resp.json();
 }
 
-export async function fetchPuzzleInfo(pid: number): Promise<InfoJson> {
-  const resp = await fetch(`${SERVER_URL}/api/puzzle/${pid}/info`);
-  return resp.json();
+export async function fetchPuzzleInfo(pid: number): Promise<InfoJson | null> {
+  try {
+    const resp = await fetch(`${SERVER_URL}/api/puzzle/${pid}/info`);
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch {
+    return null;
+  }
 }
 
 export async function recordSolve(
