@@ -3,6 +3,8 @@ import {test as base, expect, Page, Locator} from '@playwright/test';
 export interface GameHelpers {
   page: Page;
   consoleErrors: string[];
+  /** True when the puzzle is a contest (Check/Reveal buttons are hidden) */
+  isContest: boolean;
   /** Click a cell by row and column (space-separated in data-rc attr) */
   clickCell: (r: number, c: number) => Promise<void>;
   /** Get the text content of the .cell--value inside a cell */
@@ -103,6 +105,9 @@ export const test = base.extend<{gamePage: GameHelpers}>({
       await page.locator(`.active.action-menu .action-menu--list--action[data-action-key="${key}"]`).click();
     };
 
+    // Detect contest mode — contest puzzles show "Mark as Solved" instead of Check/Reveal
+    const isContest = (await page.locator('.toolbar--mark-solved').count()) > 0;
+
     // Click the first white cell to activate the grid input
     const firstWhite = await findFirstWhiteCell();
     await clickCell(firstWhite.r, firstWhite.c);
@@ -110,6 +115,7 @@ export const test = base.extend<{gamePage: GameHelpers}>({
     await use({
       page,
       consoleErrors,
+      isContest,
       clickCell,
       getCellValue,
       cellHasClass,

@@ -10,8 +10,11 @@ test.describe('Toolbar actions', () => {
       cellHasClass,
       findFirstWhiteCell,
       consoleErrors,
+      isContest,
       page,
     } = gamePage;
+
+    test.skip(isContest, 'Check is hidden in contest mode');
 
     const {r, c} = await findFirstWhiteCell();
     await clickCell(r, c);
@@ -47,8 +50,11 @@ test.describe('Toolbar actions', () => {
       clickAction,
       findFirstWhiteCell,
       consoleErrors,
+      isContest,
       page,
     } = gamePage;
+
+    test.skip(isContest, 'Reveal is hidden in contest mode');
 
     const {r, c} = await findFirstWhiteCell();
     await clickCell(r, c);
@@ -152,8 +158,11 @@ test.describe('Toolbar actions', () => {
       clickAction,
       findFirstWhiteCell,
       consoleErrors,
+      isContest,
       page,
     } = gamePage;
+
+    test.skip(isContest, 'Check is hidden in contest mode');
 
     const {r, c} = await findFirstWhiteCell();
     await clickCell(r, c);
