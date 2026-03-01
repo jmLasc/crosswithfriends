@@ -172,6 +172,7 @@ export default class MobileGridControls extends GridControls {
   }
 
   handleClueBarTouchEnd = (e) => {
+    if (!this.touchingClueBarStart) return;
     const countAsTapBuffer = 4; // px
     const touch = e.changedTouches ? e.changedTouches[0] : e;
     const touchTravelDist = Math.abs(touch.pageY - this.touchingClueBarStart.pageY);
