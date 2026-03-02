@@ -89,6 +89,10 @@ export default class Game extends Component {
     this.componentDidUpdate({});
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.milestoneTimeout);
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.myColor !== this.props.myColor) {
       this.handleUpdateColor(this.props.id, this.props.myColor);

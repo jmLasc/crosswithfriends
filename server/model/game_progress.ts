@@ -59,21 +59,24 @@ function computeSingleGameProgress(events: any[]): number {
       solution = payload.params?.game?.solution;
     } else if (type === 'updateCell' && grid) {
       const {cell, value} = payload.params || {};
-      if (cell && grid[cell.r]?.[cell.c] && !grid[cell.r][cell.c].black) {
-        grid[cell.r][cell.c] = {...grid[cell.r][cell.c], value: value || ''};
+      const gridCell = cell && grid[cell.r]?.[cell.c];
+      if (gridCell && !gridCell.black) {
+        grid[cell.r][cell.c] = {...gridCell, value: value || ''};
       }
     } else if (type === 'reveal' && grid && solution) {
       const scope: {r: number; c: number}[] = payload.params?.scope || [];
       for (const {r, c} of scope) {
-        if (grid[r]?.[c] && solution[r]?.[c]) {
-          grid[r][c] = {...grid[r][c], value: solution[r][c]};
+        const gridCell = grid[r]?.[c];
+        if (gridCell && solution[r]?.[c]) {
+          grid[r][c] = {...gridCell, value: solution[r][c]};
         }
       }
     } else if (type === 'reset' && grid) {
       const scope: {r: number; c: number}[] = payload.params?.scope || [];
       for (const {r, c} of scope) {
-        if (grid[r]?.[c]) {
-          grid[r][c] = {...grid[r][c], value: ''};
+        const gridCell = grid[r]?.[c];
+        if (gridCell) {
+          grid[r][c] = {...gridCell, value: ''};
         }
       }
     }

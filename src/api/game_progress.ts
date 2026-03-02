@@ -22,7 +22,8 @@ export async function fetchGameProgress(gids: string[]): Promise<Record<string, 
     }
     const results = await Promise.all(batches.map(fetchBatch));
     return Object.assign({}, ...results);
-  } catch {
+  } catch (e) {
+    console.error('Failed to fetch game progress:', e);
     return {};
   }
 }
