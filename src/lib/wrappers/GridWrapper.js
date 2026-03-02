@@ -106,7 +106,9 @@ export default class GridWrapper {
         if (cell.value !== '') filled += 1;
       }
     }
-    return total > 0 ? Math.round((filled / total) * 100) : 0;
+    if (total === 0) return 0;
+    const percent = Math.round((filled / total) * 100);
+    return filled < total ? Math.min(percent, 99) : 100;
   }
 
   getNextCell(r, c, direction) {
