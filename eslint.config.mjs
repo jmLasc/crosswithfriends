@@ -17,7 +17,7 @@ export default tseslint.config(
       'utils/',
       'jest.config.server.js',
       'middleware.ts',
-      'prettier.config.js',
+      'prettier.config.mjs',
     ],
   },
 
