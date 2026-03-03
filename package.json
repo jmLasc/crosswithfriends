@@ -50,7 +50,8 @@
       "@types/react-dom": "^19.2.3",
       "esbuild": "^0.27.3",
       "serialize-javascript": "^7.0.3",
-      "diff": "^5.2.0"
+      "diff": "^5.2.0",
+      "glob": "^13.0.6"
     },
     "onlyBuiltDependencies": [
       "bcrypt",
