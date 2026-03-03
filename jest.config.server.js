@@ -12,5 +12,5 @@ module.exports = {
     '^.+\\.tsx?$': ['ts-jest', {tsconfig: 'server/tsconfig.json'}],
     '^.+\\.jsx?$': ['babel-jest', {presets: ['@babel/preset-env']}],
   },
-  transformIgnorePatterns: ['/node_modules/'],
+  transformIgnorePatterns: ['/node_modules/(?!uuid/)'],
 };
