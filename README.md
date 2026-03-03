@@ -50,7 +50,7 @@ Hosted at [crosswithfriends.com](https://www.crosswithfriends.com).
 
 ## Getting Started
 
-1. Clone the repo and use Node 20:
+1. Clone the repo and use Node 22:
 
    ```sh
    git clone https://github.com/ScaleOvenStove/crosswithfriends.git
