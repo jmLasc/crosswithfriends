@@ -6,25 +6,25 @@ import _ from 'lodash';
 const parser = new ArgumentParser({
   description: 'compiles names & urls into a json with shape { [name]: url, ... }',
 });
-parser.addArgument('--names', {
+parser.add_argument('--names', {
   action: 'store',
   required: true,
   dest: 'names',
   help: 'The path to names json file (array of strings)',
 });
-parser.addArgument('--urls', {
+parser.add_argument('--urls', {
   action: 'store',
   required: true,
   dest: 'urls',
   help: 'The path to urls json file (array of strings)',
 });
-parser.addArgument('--out', {
+parser.add_argument('--out', {
   action: 'store',
-  defaultValue: 'out.json',
+  default: 'out.json',
   dest: 'out',
   help: 'The path that the output json file should be written',
 });
-const args = parser.parseArgs();
+const args = parser.parse_args();
 console.log(args);
 
 import fs from 'fs';
