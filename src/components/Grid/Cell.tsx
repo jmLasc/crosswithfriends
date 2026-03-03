@@ -110,13 +110,13 @@ export default class Cell extends React.Component<Props> {
     );
   }
 
-  handleFlipClick: React.MouseEventHandler<Element> = (e) => {
+  handleFlipClick: React.MouseEventHandler<SVGElement> = (e) => {
     e.stopPropagation();
     const {onFlipColor} = this.props;
     if (onFlipColor) onFlipColor(this.props.r, this.props.c);
   };
 
-  handleFlipKeyDown: React.KeyboardEventHandler<Element> = (e) => {
+  handleFlipKeyDown: React.KeyboardEventHandler<SVGElement> = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.stopPropagation();
       const {onFlipColor} = this.props;
