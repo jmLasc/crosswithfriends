@@ -31,7 +31,6 @@ interface PlayerProps {
   onVimInsert: any;
   onVimNormal: any;
   mobile: any;
-  pickups: any;
   optimisticCounter: any;
 }
 
@@ -86,7 +85,6 @@ export const transformGameToPlayerProps = (
     onVimInsert: null,
     onVimNormal: null,
     mobile: null,
-    pickups: null,
     optimisticCounter: null,
   };
 };

@@ -8,10 +8,5 @@
       "@lib/*": ["./src/lib/*"]
     }
   },
-  "include": [
-    "eslint.config.mjs",
-    "src",
-    "vite.config.ts",
-    "vitest.config.ts"
-  ]
+  "include": ["eslint.config.mjs", "src", "vite.config.ts", "vitest.config.ts"]
 }

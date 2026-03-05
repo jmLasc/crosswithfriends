@@ -5,7 +5,6 @@ import {Component} from 'react';
 import _ from 'lodash';
 import Confetti from './Confetti.js';
 
-import * as powerups from '../../lib/powerups';
 import Player from '../Player';
 import Toolbar from '../Toolbar';
 import MilestoneToast from './MilestoneToast';
@@ -114,30 +113,8 @@ export default class Game extends Component {
     }
   }
 
-  get rawGame() {
-    return this.props.historyWrapper && this.props.historyWrapper.getSnapshot();
-  }
-
-  get rawOpponentGame() {
-    return this.props.opponentHistoryWrapper && this.props.opponentHistoryWrapper.getSnapshot();
-  }
-
-  // TODO: this should be cached, sigh...
-  get games() {
-    return powerups.apply(
-      this.rawGame,
-      this.rawOpponentGame,
-      this.props.ownPowerups,
-      this.props.opponentPowerups
-    );
-  }
-
   get game() {
-    return this.games.ownGame;
-  }
-
-  get opponentGame() {
-    return this.games.opponentGame;
+    return this.props.historyWrapper && this.props.historyWrapper.getSnapshot();
   }
 
   get gameModel() {
@@ -163,7 +140,6 @@ export default class Game extends Component {
     const {autocheckMode} = this.state;
     this.gameModel.updateCell(r, c, id, myColor, pencilMode, value, autocheckMode);
     this.props.onChange({isEdit: true});
-    this.props.battleModel && this.props.battleModel.checkPickups(r, c, this.rawGame, this.props.team);
     this.checkMilestone();
   };
 
@@ -382,7 +358,6 @@ export default class Game extends Component {
       const dirToHide = window.location.host.includes('down') ? 'across' : 'down';
       clues[dirToHide] = _.assign([], clues[dirToHide]).map((val) => val && '-');
     }
-    const opponentGrid = this.opponentGame && this.opponentGame.grid;
     const screenWidth = window.innerWidth - 1; // this is important for mobile to fit on screen
     const themeStyles = {
       clueBarStyle: {
@@ -416,7 +391,6 @@ export default class Game extends Component {
         size={size}
         grid={grid}
         solution={solution}
-        opponentGrid={opponentGrid}
         circles={circles}
         shades={shades}
         images={images}
@@ -449,7 +423,6 @@ export default class Game extends Component {
         autoAdvanceCursor={this.state.autoAdvanceCursor}
         colorAttributionMode={this.state.colorAttributionMode}
         mobile={mobile}
-        pickups={this.props.pickups}
         optimisticCounter={optimisticCounter}
         onCheck={this.handleCheck}
         onReveal={this.handleReveal}

@@ -31,15 +31,8 @@ export default class Chat extends Component {
   }
 
   componentDidMount() {
-    let username = this.props.initialUsername;
-    const battleName = localStorage.getItem(`battle_${this.props.bid}`);
-    // HACK
-    if (battleName && !username) {
-      username = battleName;
-      this.setState({username: battleName});
-    } else {
-      this.setState({username});
-    }
+    const username = this.props.initialUsername;
+    this.setState({username});
     this.handleUpdateDisplayName(username);
   }
 

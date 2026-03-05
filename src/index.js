@@ -30,7 +30,6 @@ import {Game, Room, WrappedWelcome} from './pages';
 
 // Lazy-loaded pages (loaded on demand when route is visited)
 const Account = React.lazy(() => import('./pages/Account'));
-const Battle = React.lazy(() => import('./pages/Battle'));
 const Fencing = React.lazy(() => import('./pages/Fencing'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const Help = React.lazy(() => import('./pages/Help'));
@@ -136,7 +135,6 @@ const Root = () => {
                     <Route path="/replays" element={<Replays />} />
                     <Route path="/beta" element={<WrappedWelcome />} />
                     <Route path="/beta/game/:gid" element={<Game />} />
-                    <Route path="/beta/battle/:bid" element={<Battle />} />
                     <Route path="/beta/play/:pid" element={<Play />} />
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/terms" element={<Terms />} />

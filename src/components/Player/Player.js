@@ -387,7 +387,6 @@ export default class Player extends Component {
       myColor,
       users = {},
       id,
-      pickups,
       clueBarStyle = {},
       gridStyle = {},
       colorAttributionMode,
@@ -450,7 +449,6 @@ export default class Player extends Component {
       cellStyle,
       myColor,
       onChangeDirection: this._changeDirection,
-      pickups,
       frozen,
     };
 

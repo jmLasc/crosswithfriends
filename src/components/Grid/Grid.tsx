@@ -1,19 +1,17 @@
 import './css/index.css';
 
 import React from 'react';
-import _ from 'lodash';
 import GridWrapper from '../../lib/wrappers/GridWrapper';
 import RerenderBoundary from '../RerenderBoundary';
 import {hashGridRow} from './hashGridRow';
 import Cell from './Cell';
-import {GridDataWithColor, CellCoords, ClueCoords, BattlePickup, CellStyles, Ping} from './types';
-import {CellIndex, ColoredShade, Cursor, GridData, ShadeEntry, toCellIndex} from '../../shared/types';
+import {GridDataWithColor, CellCoords, ClueCoords, CellStyles, Ping} from './types';
+import {CellIndex, ColoredShade, Cursor, ShadeEntry, toCellIndex} from '../../shared/types';
 
 export interface GridProps {
   // Grid data
   solution: string[][];
   grid: GridDataWithColor;
-  opponentGrid: GridData;
 
   // Cursor state
   selected: CellCoords;
@@ -28,7 +26,6 @@ export interface GridProps {
 
   // Styles & related
   references: ClueCoords[];
-  pickups?: BattlePickup[];
   cellStyle: CellStyles;
   myColor: string;
 
@@ -50,10 +47,6 @@ export default class Grid extends React.PureComponent<GridProps> {
     return new GridWrapper(this.props.grid);
   }
 
-  get opponentGrid() {
-    return this.props.opponentGrid && new GridWrapper(this.props.opponentGrid);
-  }
-
   get selectedIsWhite() {
     const {selected} = this.props;
     return this.grid.isWhite(selected.r, selected.c);
@@ -70,15 +63,6 @@ export default class Grid extends React.PureComponent<GridProps> {
     return (circles || []).indexOf(idx) !== -1;
   }
 
-  isDoneByOpponent(r: number, c: number) {
-    if (!this.opponentGrid || !this.props.solution) {
-      return false;
-    }
-    return (
-      this.opponentGrid.isFilled(r, c) && this.props.solution[r][c] === this.props.opponentGrid[r][c].value
-    );
-  }
-
   isShaded(r: number, c: number): string | boolean {
     const {grid, shades} = this.props;
     const idx = toCellIndex(r, c, grid[0].length);
@@ -90,7 +74,7 @@ export default class Grid extends React.PureComponent<GridProps> {
         return true;
       }
     }
-    return this.isDoneByOpponent(r, c);
+    return false;
   }
 
   getImage(r: number, c: number): string | undefined {
@@ -113,16 +97,6 @@ export default class Grid extends React.PureComponent<GridProps> {
 
   isReferenced(r: number, c: number) {
     return this.props.references.some((clue) => this.clueContainsSquare(clue, r, c));
-  }
-
-  getPickup(r: number, c: number) {
-    return (
-      this.props.pickups &&
-      _.get(
-        _.find(this.props.pickups, ({i, j, pickedUp}) => i === r && j === c && !pickedUp),
-        'type'
-      )
-    );
   }
 
   handleClick = (r: number, c: number) => {
@@ -180,7 +154,6 @@ export default class Grid extends React.PureComponent<GridProps> {
         highlighted: this.isHighlighted(r, c),
         myColor: this.props.myColor,
         frozen: this.props.frozen,
-        pickupType: this.getPickup(r, c),
         cellStyle,
       }))
     );

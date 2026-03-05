@@ -10,7 +10,7 @@ import {Link} from 'react-router';
 import Nav from '../components/common/Nav';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import actions from '../actions';
-import {getUser, BattleModel} from '../store';
+import {getUser} from '../store';
 import redirect from '../lib/redirect';
 import {createGame, dismissGame} from '../api/create_game';
 import {fetchPuzzleInfo} from '../api/puzzle';
@@ -49,10 +49,6 @@ class Play extends Component {
     fetchPuzzleInfo(this.pid).then((info) => {
       if (info) this.setState({puzzleInfo: info});
     });
-
-    if (this.query.mode === 'battle') {
-      this.createAndJoinBattle();
-    }
   }
 
   get pid() {
@@ -72,10 +68,6 @@ class Play extends Component {
   }
 
   componentDidUpdate() {
-    if (this.query.mode === 'battle') {
-      return;
-    }
-
     const {games} = this;
     if (!games) return; // history not loaded yet
     const shouldAutocreate = !this.state.creating && (games.length === 0 || this.is_new || this.is_fencing);
@@ -172,16 +164,6 @@ class Play extends Component {
     if (inProgressGids.length === 0) return;
     fetchGameProgress(inProgressGids).then((progress) => {
       this.setState({gameProgress: progress});
-    });
-  }
-
-  createAndJoinBattle() {
-    actions.getNextBid((bid) => {
-      const battle = new BattleModel(`/battle/${bid}`);
-      battle.initialize(this.pid, bid);
-      battle.once('ready', () => {
-        redirect(`/beta/battle/${bid}`);
-      });
     });
   }
 

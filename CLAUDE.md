@@ -100,6 +100,7 @@ Sentry is opt-in via environment variables. Without the DSN set, Sentry is compl
 **Capturing errors**: Use `Sentry.captureException(error)` in catch blocks to report errors as Sentry Issues. The `consoleLoggingIntegration` also captures `console.log`, `console.warn`, and `console.error` as Sentry logs automatically.
 
 **Structured logging**: Use `Sentry.logger` for structured logs:
+
 ```js
 import * as Sentry from '@sentry/react';
 const {logger} = Sentry;
@@ -109,6 +110,7 @@ logger.debug(logger.fmt`Cache miss for user: ${userId}`);
 ```
 
 **Custom spans**: Use `Sentry.startSpan()` for performance instrumentation:
+
 ```js
 Sentry.startSpan({op: 'http.client', name: 'GET /api/users'}, async () => {
   const response = await fetch('/api/users');
@@ -119,6 +121,7 @@ Sentry.startSpan({op: 'http.client', name: 'GET /api/users'}, async () => {
 **Backend** uses `@sentry/node` for error tracking. Initialized via `server/instrument.ts` which is imported at the top of `server/server.ts`. `Sentry.setupExpressErrorHandler(app)` is registered before the custom error middleware so all unhandled errors are captured automatically.
 
 **Backend error capture**: Use `Sentry.captureException(error)` in catch blocks. Import from `@sentry/node`:
+
 ```ts
 import * as Sentry from '@sentry/node';
 ```

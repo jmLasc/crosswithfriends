@@ -27,6 +27,3 @@ export type ClueCoords = {
   ori: string;
   num: number;
 };
-
-// XXX fixme
-export type BattlePickup = any;

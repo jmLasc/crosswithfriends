@@ -1,13 +1,11 @@
 import {offline} from './firebase';
 
-import battle from './battle';
 import demoGame from './demoGame';
 import demoUser, {getUser as _demoGetUser} from './demoUser';
 import game from './game';
 import user, {getUser as _getUser} from './user';
 import puzzle from './puzzle';
 
-export const BattleModel = battle;
 export const GameModel = offline ? demoGame : game;
 export const UserModel = offline ? demoUser : user;
 export const PuzzleModel = puzzle;

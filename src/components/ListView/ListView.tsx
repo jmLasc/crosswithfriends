@@ -47,10 +47,6 @@ export default class ListView extends React.PureComponent<ListViewProps> {
     return new GridWrapper(this.props.grid);
   }
 
-  get opponentGrid() {
-    return this.props.opponentGrid && new GridWrapper(this.props.opponentGrid);
-  }
-
   get selectedIsWhite() {
     const {selected} = this.props;
     return this.grid.isWhite(selected.r, selected.c);
@@ -67,19 +63,10 @@ export default class ListView extends React.PureComponent<ListViewProps> {
     return (circles || []).indexOf(idx) !== -1;
   }
 
-  isDoneByOpponent(r: number, c: number) {
-    if (!this.opponentGrid || !this.props.solution) {
-      return false;
-    }
-    return (
-      this.opponentGrid.isFilled(r, c) && this.props.solution[r][c] === this.props.opponentGrid[r][c].value
-    );
-  }
-
   isShaded(r: number, c: number) {
     const {grid, shades} = this.props;
     const idx = toCellIndex(r, c, grid[0].length);
-    return (shades || []).indexOf(idx) !== -1 || this.isDoneByOpponent(r, c);
+    return (shades || []).indexOf(idx) !== -1;
   }
 
   getImage(r: number, c: number): string | undefined {
@@ -103,16 +90,6 @@ export default class ListView extends React.PureComponent<ListViewProps> {
 
   isReferenced(r: number, c: number, dir: 'across' | 'down') {
     return this.props.references.some((clue) => this.clueContainsSquare(clue, r, c, dir));
-  }
-
-  getPickup(r: number, c: number) {
-    return (
-      this.props.pickups &&
-      _.get(
-        _.find(this.props.pickups, ({i, j, pickedUp}) => i === r && j === c && !pickedUp),
-        'type'
-      )
-    );
   }
 
   handleClick = (r: number, c: number, dir: 'across' | 'down') => {
@@ -175,7 +152,6 @@ export default class ListView extends React.PureComponent<ListViewProps> {
 
           myColor: this.props.myColor,
           frozen: this.props.frozen,
-          pickupType: this.getPickup(r, c),
           cellStyle: this.props.cellStyle,
         };
         if (_.isNumber(cell.parents?.across)) {

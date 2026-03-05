@@ -168,5 +168,5 @@ export default tseslint.config(
   },
 
   // ── Prettier (must be last) ──
-  prettier,
+  prettier
 );

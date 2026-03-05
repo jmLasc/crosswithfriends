@@ -196,10 +196,6 @@ export default class Game extends EventEmitter {
   }
 
   async attach() {
-    this.ref.child('battleData').on('value', (snapshot) => {
-      this.emit('battleData', snapshot.val());
-    });
-
     const websocketPromise = this.connectToWebsocket().then(() => this.subscribeToWebsocketEvents());
     await websocketPromise;
   }
@@ -348,7 +344,7 @@ export default class Game extends EventEmitter {
     });
   }
 
-  async initialize(rawGame, {battleData} = {}) {
+  async initialize(rawGame) {
     console.log('initialize');
     const {
       info = {},
@@ -396,9 +392,5 @@ export default class Game extends EventEmitter {
         game,
       },
     });
-
-    if (battleData) {
-      this.ref.child('battleData').set(battleData);
-    }
   }
 }

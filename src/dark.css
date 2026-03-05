@@ -404,15 +404,6 @@
   color: var(--dark-primary-text);
 }
 
-/* Powerups */
-.dark .powerups--main {
-  background-color: rgb(255 255 255 / 5%);
-}
-
-.dark .powerups--count {
-  background-color: #1565c0;
-}
-
 /* Welcome Page (additional) */
 .dark .welcome--searchbar {
   border-color: #555;

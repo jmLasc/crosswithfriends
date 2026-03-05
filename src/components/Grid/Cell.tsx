@@ -2,8 +2,6 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import clsx from 'clsx';
 import {FaNoteSticky} from 'react-icons/fa6';
-import Emoji from '../common/Emoji';
-import powerups from '../../lib/powerups';
 
 import {Ping, CellStyles} from './types';
 import './css/cell.css';
@@ -27,7 +25,6 @@ export interface EnhancedCellData extends CellData {
   image?: string;
   referenced: boolean;
   canFlipColor: boolean;
-  pickupType: keyof typeof powerups;
 
   // Styles
   attributionColor: string;
@@ -169,15 +166,6 @@ export default class Cell extends React.Component<Props> {
     return null;
   }
 
-  renderPickup() {
-    const {pickupType} = this.props;
-    if (pickupType) {
-      const {icon} = powerups[pickupType];
-      return <Emoji emoji={icon} big={false} />;
-    }
-    return null;
-  }
-
   renderSolvedBy() {
     if (!this.props.solvedBy) return null;
     const divStyle: React.CSSProperties = {
@@ -313,7 +301,6 @@ export default class Cell extends React.Component<Props> {
           {this.renderFlipButton()}
           {this.renderCircle()}
           {this.renderShade()}
-          {this.renderPickup()}
           {this.renderSolvedBy()}
           {!this.props.isImage && (
             <div
