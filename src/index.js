@@ -19,19 +19,17 @@ if (sentryDsn) {
       /feature named .* was not found/,
       /Invalid call to runtime\.sendMessage/,
       // DuckDuckGo Mobile browser internals
-      'invalid origin',
+      /^invalid origin$/,
       // Cross-origin iframe (extensions / ad blockers)
       /Blocked a frame with origin/,
       /Failed to read a named property .* from 'Window'/,
       // Safari privacy restrictions
-      'The operation is insecure.',
+      /^The operation is insecure\.$/,
       // Clipboard permission denied
       /Write permission denied/,
       // Stale assets after deploy
       /Unable to preload CSS/,
       /Importing a module script failed/,
-      // Sentry transport failures
-      /Event delivery failed after all retries/,
     ],
   });
 }
