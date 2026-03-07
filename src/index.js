@@ -37,7 +37,6 @@ const Play = React.lazy(() => import('./pages/Play'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 const Replay = React.lazy(() => import('./pages/Replay'));
-const Replays = React.lazy(() => import('./pages/Replays'));
 const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
 const Terms = React.lazy(() => import('./pages/Terms'));
 const VerifyEmail = React.lazy(() => import('./pages/VerifyEmail'));
@@ -131,8 +130,6 @@ const Root = () => {
                     <Route path="/embed/room/:rid" element={<Room />} />
                     <Route path="/replay/:gid" element={<Replay />} />
                     <Route path="/beta/replay/:gid" element={<Replay />} />
-                    <Route path="/replays/:pid" element={<Replays />} />
-                    <Route path="/replays" element={<Replays />} />
                     <Route path="/beta" element={<WrappedWelcome />} />
                     <Route path="/beta/game/:gid" element={<Game />} />
                     <Route path="/beta/play/:pid" element={<Play />} />
