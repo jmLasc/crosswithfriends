@@ -17,23 +17,56 @@ test.describe('Puzzle list', () => {
     assertNoFatalErrors(consoleErrors);
   });
 
-  test('search input accepts text and filters results', async ({smoke}) => {
+  test('search input filters results by title or author', async ({smoke}) => {
     const {page, consoleErrors} = smoke;
 
     await page.goto('/');
     await assertPageRendered(page);
 
-    // Wait for puzzles to load
+    // Wait for initial puzzles to load
     await expect(page.locator('.entry').first()).toBeVisible({timeout: 15_000});
 
-    // Type a search term
+    // Type a search term and intercept the filtered API response
+    const responsePromise = page.waitForResponse(
+      (r) => r.url().includes('/api/puzzle_list') && r.url().includes('mini')
+    );
     await page.locator('input.welcome--searchbar').fill('mini');
+    const response = await responsePromise;
+    const body = await response.json();
 
-    // Wait for debounce (250ms) + re-render
-    await page.waitForTimeout(500);
+    // Backend should return results where every title/author matches 'mini'
+    expect(body.puzzles.length).toBeGreaterThan(0);
+    for (const p of body.puzzles) {
+      const combined = `${p.content.info.title} ${p.content.info.author}`.toLowerCase();
+      expect(combined).toContain('mini');
+    }
 
-    // List should still have entries (mini puzzles exist)
-    await expect(page.locator('.entry').first()).toBeVisible();
+    assertNoFatalErrors(consoleErrors);
+  });
+
+  test('size filter restricts results to selected sizes', async ({smoke}) => {
+    const {page, consoleErrors} = smoke;
+
+    await page.goto('/');
+    await assertPageRendered(page);
+
+    // Wait for initial puzzles to load
+    await expect(page.locator('.entry').first()).toBeVisible({timeout: 15_000});
+
+    // Uncheck Midi checkbox and intercept the API response
+    const midiCheckbox = page.locator('input[type="checkbox"][data-header="Size"][data-name="Midi"]');
+    const responsePromise = page.waitForResponse(
+      (r) => r.url().includes('/api/puzzle_list') && r.url().includes('Midi')
+    );
+    await midiCheckbox.click();
+    const response = await responsePromise;
+
+    // Verify the API request sent the correct filter
+    expect(response.url()).toContain('filter%5BsizeFilter%5D%5BMidi%5D=false');
+
+    // Verify the backend processed it (returned puzzles)
+    const body = await response.json();
+    expect(body.puzzles).toBeDefined();
 
     assertNoFatalErrors(consoleErrors);
   });

@@ -18,13 +18,14 @@ import {cleanupExpiredTokens} from './model/refresh_token';
 import {cleanupExpiredEmailTokens, cleanupExpiredResetTokens} from './model/email_token';
 
 const app = express();
+app.set('query parser', 'extended');
 const server = new http.Server(app);
 app.use(
   helmet({
     contentSecurityPolicy: false, // disable CSP for now — MUI v4 uses inline styles
   })
 );
-app.use(express.json({limit: '500kb'}));
+app.use(express.json({limit: '1mb'}));
 app.use(cookieParser());
 app.use(passport.initialize());
 const port = process.env.PORT || 3000;
