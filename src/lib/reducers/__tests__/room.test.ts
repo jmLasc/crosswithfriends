@@ -1,8 +1,8 @@
 import {vi} from 'vitest';
 
-// Mock store/user to avoid Firebase import chain
-vi.mock('../../../../src/store/user', () => ({
-  getUser: () => ({id: 'mock-user'}),
+// Mock localAuth to provide a stable test ID
+vi.mock('../../../../src/localAuth', () => ({
+  default: () => 'mock-user',
 }));
 
 import {roomReducer, initialRoomState} from '../room';

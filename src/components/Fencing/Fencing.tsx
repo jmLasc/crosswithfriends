@@ -11,7 +11,7 @@ import {transformGameToPlayerProps} from './transformGameToPlayerProps';
 import {usePlayerActions} from './usePlayerActions';
 import {useToolbarActions} from './useToolbarActions';
 import {GameEvent} from '../../shared/fencingGameEvents/types/GameEvent';
-import {getUser} from '../../store/user';
+import getLocalId from '../../localAuth';
 import {FencingScoreboard} from './FencingScoreboard';
 import {TEAM_IDS} from '../../shared/fencingGameEvents/constants';
 import {FencingToolbar} from './FencingToolbar';
@@ -81,7 +81,7 @@ export const Fencing: React.FC<{gid: string}> = (props) => {
   }, [gid, socket]);
   const gameState = eventsHook.gameState;
 
-  const id = getUser().id;
+  const id = getLocalId();
   const teamId = gameState.users[id]?.teamId;
   const isGameComplete =
     gameState.game?.grid.every((row) => row.every((cell) => cell.good || cell.black)) ?? false;

@@ -82,7 +82,7 @@ class SocketManager {
           console.error('Invalid game_event: missing event or type');
           return;
         }
-        // Replace Firebase-style sentinel timestamps with real server time
+        // Replace non-numeric timestamps with real server time
         if (typeof event.timestamp !== 'number') {
           event.timestamp = Date.now();
         }

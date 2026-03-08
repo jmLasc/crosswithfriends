@@ -86,9 +86,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (id.includes('node_modules/firebase/') || id.includes('node_modules/@firebase/'))
-            return 'vendor-firebase';
-          if (id.includes('/lodash/')) return 'vendor-lodash';
+if (id.includes('/lodash/')) return 'vendor-lodash';
           if (
             id.includes('/react-dom/') ||
             id.includes('/react/') ||
