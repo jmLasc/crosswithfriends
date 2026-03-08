@@ -34,10 +34,27 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch puzzle statuses from PostgreSQL
+  // Fetch puzzle statuses from PostgreSQL (with localStorage cache for instant rendering)
+  const statusCacheKey = user?.id ? `puzzleStatuses:${user.id}` : 'puzzleStatuses:guest';
   const [pgStatuses, setPgStatuses] = useState<PuzzleStatuses>({});
   useEffect(() => {
+    // Immediately load cached statuses for this user/guest key
+    try {
+      const cached = localStorage.getItem(statusCacheKey);
+      if (cached) setPgStatuses(JSON.parse(cached));
+    } catch {
+      // ignore
+    }
     let stale = false;
+    const updateStatuses = (statuses: PuzzleStatuses) => {
+      if (stale) return;
+      setPgStatuses(statuses);
+      try {
+        localStorage.setItem(statusCacheKey, JSON.stringify(statuses));
+      } catch {
+        // localStorage full or unavailable — ignore
+      }
+    };
     if (user?.id && accessToken) {
       // Authenticated: fetch from user stats endpoint
       getUserStats(user.id, accessToken).then((stats) => {
@@ -49,20 +66,20 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
         (stats.inProgress || []).forEach((item) => {
           if (!statuses[item.pid]) statuses[item.pid] = 'started';
         });
-        setPgStatuses(statuses);
+        updateStatuses(statuses);
       });
     } else {
       // Guest: fetch by dfac_id
       const dfacId = getLocalId();
       fetchGuestPuzzleStatuses(dfacId).then((statuses) => {
         if (stale) return;
-        setPgStatuses(statuses);
+        updateStatuses(statuses);
       });
     }
     return () => {
       stale = true;
     };
-  }, [user?.id, accessToken]);
+  }, [user?.id, accessToken, statusCacheKey]);
   const [fullyLoaded, setFullyLoaded] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);
   const pageSize = 50;

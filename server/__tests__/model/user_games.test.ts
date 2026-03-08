@@ -60,7 +60,7 @@ describe('getUserGamesForPuzzle', () => {
       solved: true,
       time: new Date('2026-03-01T10:00:00Z').getTime(),
       v2: true,
-      percentComplete: 0,
+      percentComplete: 100,
     });
     expect(result[1]).toEqual({
       gid: 'game-2',

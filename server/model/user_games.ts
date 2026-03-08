@@ -115,6 +115,6 @@ export async function getUserGamesForPuzzle(
     solved: r.solved,
     time: r.last_activity ? new Date(r.last_activity).getTime() : 0,
     v2: r.v2,
-    percentComplete: progressMap.get(r.gid) ?? 0,
+    percentComplete: r.solved ? 100 : (progressMap.get(r.gid) ?? 0),
   }));
 }
