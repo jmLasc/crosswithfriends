@@ -1,8 +1,11 @@
 .welcome-variants {
   display: flex;
   flex-direction: column;
-  padding: 8px 25px !important;
   font-size: 13px;
+}
+
+.welcome--sidebar > .welcome-variants {
+  padding: 8px 25px;
 }
 
 .welcome-variants a {
