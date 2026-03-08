@@ -3,8 +3,7 @@ import firebase from './store/firebase';
 
 import {incrementGid, incrementPid} from './api/counters';
 
-// for interfacing with firebase
-
+// Used by backfill scripts (backfills/progress.js, deleteGames.js, v2pid.js)
 const db = firebase.database();
 function disconnect() {
   // no-op for now

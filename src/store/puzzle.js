@@ -51,16 +51,4 @@ export default class Puzzle extends EventEmitter {
     if (!this.data) return undefined;
     return this.data.info;
   }
-
-  // return list of games that were played off this puzzle
-  // includes beta games, but not solo games
-  listGames(limit = 100) {
-    return db
-      .ref('/game')
-      .orderByChild('pid')
-      .equalTo(this.pid)
-      .limitToLast(limit)
-      .once('value')
-      .then((snapshot) => snapshot.val());
-  }
 }

@@ -6,8 +6,6 @@ import * as uuid from 'uuid';
 import * as colors from '../lib/colors';
 import {emitAsync, emitAsyncWithTimeout} from '../sockets/emitAsync';
 import {getSocket} from '../sockets/getSocket';
-import {db} from './firebase';
-
 // ============ Serialize / Deserialize Helpers ========== //
 
 // Recursively walks obj and converts `null` to `undefined`
@@ -32,8 +30,6 @@ export default class Game extends EventEmitter {
     super();
     window.game = this;
     this.path = path;
-    this.ref = db.ref(path);
-    this.eventsRef = this.ref.child('events');
     this.createEvent = null;
     this.syncState = null; // null | 'retrying' | 'failed'
   }
@@ -342,10 +338,7 @@ export default class Game extends EventEmitter {
       themeColor,
     };
     const version = CURRENT_VERSION;
-    // nuke existing events
 
-    this.ref.child('pid').set(pid);
-    await this.eventsRef.set({});
     await this.addEvent({
       timestamp: Date.now(),
       type: 'create',
