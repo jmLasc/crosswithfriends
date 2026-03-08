@@ -28,11 +28,19 @@ export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStat
   );
 
   const statuses: PuzzleStatusMap = {};
-  for (const row of result.rows) {
+  for (const row of result.rows as {pid: string; status: 'solved' | 'started'}[]) {
     statuses[row.pid] = row.status;
   }
   return statuses;
 }
+
+type UserGameRow = {
+  gid: string;
+  pid: string;
+  solved: boolean;
+  last_activity: Date | null;
+  v2: boolean;
+};
 
 export type UserGameItem = {
   gid: string;
@@ -96,10 +104,11 @@ export async function getUserGamesForPuzzle(
     options.userId ? [dfacIds, pid, options.userId] : [dfacIds, pid]
   );
 
-  const unsolved = result.rows.filter((r: any) => !r.solved).map((r: any) => r.gid);
+  const rows: UserGameRow[] = result.rows;
+  const unsolved = rows.filter((r) => !r.solved).map((r) => r.gid);
   const progressMap = unsolved.length > 0 ? await computeGamesProgress(unsolved) : new Map();
 
-  return result.rows.map((r: any) => ({
+  return rows.map((r) => ({
     gid: r.gid,
     pid: r.pid,
     solved: r.solved,
