@@ -37,10 +37,11 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
   // Fetch puzzle statuses from PostgreSQL
   const [pgStatuses, setPgStatuses] = useState<PuzzleStatuses>({});
   useEffect(() => {
+    let stale = false;
     if (user?.id && accessToken) {
       // Authenticated: fetch from user stats endpoint
       getUserStats(user.id, accessToken).then((stats) => {
-        if (!stats) return;
+        if (stale || !stats) return;
         const statuses: PuzzleStatuses = {};
         (stats.history || []).forEach((item) => {
           statuses[item.pid] = 'solved';
@@ -54,9 +55,13 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
       // Guest: fetch by dfac_id
       const dfacId = getLocalId();
       fetchGuestPuzzleStatuses(dfacId).then((statuses) => {
+        if (stale) return;
         setPgStatuses(statuses);
       });
     }
+    return () => {
+      stale = true;
+    };
   }, [user?.id, accessToken]);
   const [fullyLoaded, setFullyLoaded] = useState<boolean>(false);
   const [page, setPage] = useState<number>(0);

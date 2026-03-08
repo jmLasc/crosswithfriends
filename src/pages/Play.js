@@ -37,6 +37,7 @@ class Play extends Component {
   }
 
   componentDidMount() {
+    this._lastAccessToken = this.context?.accessToken ?? null;
     this.loadGames();
 
     fetchPuzzleInfo(this.pid).then((info) => {
@@ -68,6 +69,13 @@ class Play extends Component {
   }
 
   componentDidUpdate() {
+    // Re-fetch when auth context hydrates after mount
+    const currentToken = this.context?.accessToken ?? null;
+    if (currentToken !== this._lastAccessToken) {
+      this._lastAccessToken = currentToken;
+      this.loadGames();
+    }
+
     const {games} = this.state;
     if (!games) return; // not loaded yet
     const shouldAutocreate = !this.state.creating && (games.length === 0 || this.is_new || this.is_fencing);
