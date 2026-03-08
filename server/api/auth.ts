@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/node';
 import bcrypt from 'bcrypt';
 import express from 'express';
 import Joi from 'joi';
+import rateLimit from 'express-rate-limit';
 import passport from '../auth/passport';
 import {signAccessToken, verifyAccessToken} from '../auth/jwt';
 import {requireAuth} from '../auth/middleware';
@@ -66,6 +67,38 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
+// Strict limit for unauthenticated credential endpoints (signup, login, password reset)
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 requests per window
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: {error: 'Too many requests, please try again later'},
+});
+
+// Key by user ID when authenticated, fall back to IP for unauthenticated requests
+const userOrIpKey = (req: express.Request) => req.authUser?.userId || req.ip || 'unknown';
+
+// Moderate limit for email-sending endpoints (verification, password reset)
+const emailLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // 5 emails per window
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  message: {error: 'Too many requests, please try again later'},
+});
+
+// General limit for authenticated account-mutation endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  message: {error: 'Too many requests, please try again later'},
+});
+
 function buildTokenResponse(user: UserRow, accessToken: string) {
   return {
     accessToken,
@@ -83,7 +116,7 @@ function buildTokenResponse(user: UserRow, accessToken: string) {
 }
 
 // POST /api/auth/signup
-router.post('/signup', async (req, res, next) => {
+router.post('/signup', strictLimiter, async (req, res, next) => {
   try {
     const {error, value} = signupSchema.validate(req.body);
     if (error) {
@@ -118,7 +151,7 @@ router.post('/signup', async (req, res, next) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req, res, next) => {
+router.post('/login', strictLimiter, (req, res, next) => {
   const {error} = loginSchema.validate(req.body);
   if (error) {
     res.status(400).json({error: error.details[0].message});
@@ -148,7 +181,7 @@ router.post('/login', (req, res, next) => {
 });
 
 // GET /api/auth/google — initiate Google OAuth
-router.get('/google', (req, res, next) => {
+router.get('/google', strictLimiter, (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     res.status(501).json({error: 'Google OAuth is not configured on this server'});
     return;
@@ -334,7 +367,7 @@ router.get('/me', requireAuth, async (req, res) => {
 });
 
 // POST /api/auth/change-display-name
-router.post('/change-display-name', requireAuth, async (req, res) => {
+router.post('/change-display-name', authLimiter, requireAuth, async (req, res) => {
   const {displayName} = req.body;
   if (!displayName || typeof displayName !== 'string' || displayName.length < 1 || displayName.length > 64) {
     res.status(400).json({error: 'Display name must be 1-64 characters'});
@@ -345,7 +378,7 @@ router.post('/change-display-name', requireAuth, async (req, res) => {
 });
 
 // POST /api/auth/profile-visibility
-router.post('/profile-visibility', requireAuth, async (req, res) => {
+router.post('/profile-visibility', authLimiter, requireAuth, async (req, res) => {
   const {isPublic} = req.body;
   if (typeof isPublic !== 'boolean') {
     res.status(400).json({error: 'isPublic must be a boolean'});
@@ -356,7 +389,7 @@ router.post('/profile-visibility', requireAuth, async (req, res) => {
 });
 
 // POST /api/auth/change-password
-router.post('/change-password', requireAuth, async (req, res, next) => {
+router.post('/change-password', authLimiter, requireAuth, async (req, res, next) => {
   try {
     const {currentPassword, newPassword} = req.body;
     if (!currentPassword || !newPassword) {
@@ -400,7 +433,7 @@ router.post('/change-password', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/set-password — for Google-only users to add a password
-router.post('/set-password', requireAuth, async (req, res, next) => {
+router.post('/set-password', authLimiter, requireAuth, async (req, res, next) => {
   try {
     const {password} = req.body;
     if (!password || typeof password !== 'string' || password.length < 8 || password.length > 128) {
@@ -422,7 +455,7 @@ router.post('/set-password', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/change-email
-router.post('/change-email', requireAuth, async (req, res, next) => {
+router.post('/change-email', emailLimiter, requireAuth, async (req, res, next) => {
   try {
     const {newEmail, password} = req.body;
     const emailValidation = Joi.string().email().validate(newEmail);
@@ -468,7 +501,7 @@ router.post('/change-email', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/unlink-google — remove Google OAuth from account
-router.post('/unlink-google', requireAuth, async (req, res, next) => {
+router.post('/unlink-google', authLimiter, requireAuth, async (req, res, next) => {
   try {
     const user = await getUserProfile(req.authUser!.userId);
     if (!user) {
@@ -494,7 +527,7 @@ router.post('/unlink-google', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/delete-account — soft-delete the user's account
-router.post('/delete-account', requireAuth, async (req, res, next) => {
+router.post('/delete-account', authLimiter, requireAuth, async (req, res, next) => {
   try {
     const {password} = req.body;
     const user = await getUserProfile(req.authUser!.userId);
@@ -527,7 +560,7 @@ router.post('/delete-account', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/verify-email — verify email with token from email link
-router.post('/verify-email', async (req, res, next) => {
+router.post('/verify-email', strictLimiter, async (req, res, next) => {
   try {
     const {token} = req.body;
     if (!token || typeof token !== 'string') {
@@ -558,7 +591,7 @@ router.post('/verify-email', async (req, res, next) => {
 });
 
 // POST /api/auth/resend-verification — resend verification email
-router.post('/resend-verification', requireAuth, async (req, res, next) => {
+router.post('/resend-verification', emailLimiter, requireAuth, async (req, res, next) => {
   try {
     const user = await getUserProfile(req.authUser!.userId);
     if (!user) {
@@ -586,7 +619,7 @@ router.post('/resend-verification', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/auth/forgot-password — request a password reset email
-router.post('/forgot-password', async (req, res, next) => {
+router.post('/forgot-password', emailLimiter, async (req, res, next) => {
   try {
     const {email} = req.body;
     if (!email || typeof email !== 'string') {
@@ -611,7 +644,7 @@ router.post('/forgot-password', async (req, res, next) => {
 });
 
 // POST /api/auth/reset-password — reset password using token from email
-router.post('/reset-password', async (req, res, next) => {
+router.post('/reset-password', strictLimiter, async (req, res, next) => {
   try {
     const {token, newPassword} = req.body;
     if (!token || typeof token !== 'string') {
@@ -647,7 +680,7 @@ router.post('/reset-password', async (req, res, next) => {
 });
 
 // POST /api/auth/link-identity — link a dfac-id to the authenticated user
-router.post('/link-identity', requireAuth, async (req, res) => {
+router.post('/link-identity', authLimiter, requireAuth, async (req, res) => {
   const {dfacId} = req.body;
   if (!dfacId || typeof dfacId !== 'string') {
     res.status(400).json({error: 'dfacId is required'});

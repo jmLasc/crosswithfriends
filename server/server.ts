@@ -18,6 +18,7 @@ import {cleanupExpiredTokens} from './model/refresh_token';
 import {cleanupExpiredEmailTokens, cleanupExpiredResetTokens} from './model/email_token';
 
 const app = express();
+app.set('trust proxy', 1); // trust first proxy (Render) so req.ip reflects the real client
 app.set('query parser', 'extended');
 const server = new http.Server(app);
 app.use(
