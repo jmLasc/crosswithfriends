@@ -7,7 +7,7 @@ test.describe('Puzzle list', () => {
     await page.goto('/');
     await assertPageRendered(page);
 
-    // Wait for puzzle entries to appear (API + Firebase can be slow)
+    // Wait for puzzle entries to appear (API can be slow)
     await expect(page.locator('.entry').first()).toBeVisible({timeout: 15_000});
 
     // Multiple entries loaded

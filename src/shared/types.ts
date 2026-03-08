@@ -78,7 +78,7 @@ export interface Cursor {
 }
 
 /**
- * PuzzleJson: the json format of puzzles stored in the db (both firebase & postgres)
+ * PuzzleJson: the json format of puzzles stored in the db
  * Fields are a bit messy & don't correspond perfectly with puzjs formats... see logic in FileUploader.js
  */
 
