@@ -143,6 +143,10 @@ class Game extends Component {
       }
     });
 
+    this.gameModel.on('gameNotFound', () => {
+      this.setState({gameNotFound: true});
+    });
+
     this.gameModel.on('archived', () => {
       this.setState({
         archived: true,
@@ -150,7 +154,7 @@ class Game extends Component {
     });
 
     // Show error if socket doesn't connect within 10 seconds
-    this.setState({connectionFailed: false});
+    this.setState({connectionFailed: false, gameNotFound: false});
     if (this._connectionTimer) clearTimeout(this._connectionTimer);
     this._connectionTimer = setTimeout(() => {
       if (!this.historyWrapper || !this.historyWrapper.ready) {
@@ -531,7 +535,41 @@ class Game extends Component {
             for more info.
           </div>
         )}
-        {this.renderContent()}
+        {this.state.gameNotFound ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: 1,
+              padding: '40px 20px',
+              textAlign: 'center',
+            }}
+          >
+            <h2 style={{marginBottom: '12px'}}>Game not found</h2>
+            <p style={{color: '#666', maxWidth: '400px', lineHeight: '1.5'}}>
+              This game could not be loaded. It may have been created during a server issue and was not saved
+              properly.
+            </p>
+            <a
+              href="/"
+              style={{
+                marginTop: '20px',
+                padding: '10px 24px',
+                background: '#2196F3',
+                color: 'white',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+              }}
+            >
+              Back to Home
+            </a>
+          </div>
+        ) : (
+          this.renderContent()
+        )}
       </div>
     );
   }

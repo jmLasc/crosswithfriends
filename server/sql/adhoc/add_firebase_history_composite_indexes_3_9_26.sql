@@ -8,3 +8,6 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_firebase_history_dfac_pid
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_firebase_history_dfac_solved
   ON firebase_history (dfac_id, solved);
+
+-- The single-column dfac_id index is now redundant (composite indexes above cover it).
+DROP INDEX CONCURRENTLY IF EXISTS idx_firebase_history_dfac;

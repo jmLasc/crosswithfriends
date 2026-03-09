@@ -152,10 +152,19 @@ export default class Game extends EventEmitter {
       this.emitWSEvent(event);
     });
     const response = await emitAsync(this.socket, 'sync_all_game_events', this.gid);
+    // Server returns an array of events on success, or {error: ...} on failure.
+    // Only process and check for gameNotFound on a valid array response.
+    if (!Array.isArray(response)) {
+      console.error('sync_all_game_events returned error:', response);
+      return;
+    }
     response.forEach((event) => {
       event = castNullsToUndefined(event);
       this.emitWSEvent(event);
     });
+    if (!response.some((event) => event && event.type === 'create')) {
+      this.emit('gameNotFound');
+    }
   }
 
   async attach() {

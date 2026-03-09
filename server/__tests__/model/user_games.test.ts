@@ -107,8 +107,8 @@ describe('getUserGamesForPuzzle', () => {
     // The main query should include dismissal exclusion
     const mainQuery = pool.query.mock.calls[1][0];
     expect(mainQuery).toContain('game_dismissals');
-    // Should pass userId as $3 for dismissal filter
-    expect(pool.query.mock.calls[1][1]).toEqual([['dfac-abc'], '123', 'user-1']);
+    // Should pass userId as $3 and pidInt as $4 for dismissal filter
+    expect(pool.query.mock.calls[1][1]).toEqual([['dfac-abc'], '123', 'user-1', 123]);
   });
 
   it('deduplicates dfacId when it matches an existing one from userId lookup', async () => {

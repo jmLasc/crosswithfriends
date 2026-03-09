@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS firebase_history (
   PRIMARY KEY (dfac_id, gid)
 );
 
-CREATE INDEX IF NOT EXISTS idx_firebase_history_dfac ON firebase_history (dfac_id);
 CREATE INDEX IF NOT EXISTS idx_firebase_history_pid  ON firebase_history (pid);
 CREATE INDEX IF NOT EXISTS idx_firebase_history_dfac_pid ON firebase_history (dfac_id, pid);
 CREATE INDEX IF NOT EXISTS idx_firebase_history_dfac_solved ON firebase_history (dfac_id, solved);
