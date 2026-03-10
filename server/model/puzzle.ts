@@ -8,6 +8,48 @@ import {dayOfWeekExtract} from './sql_helpers';
 
 // ================ Read and Write methods used to interface with postgres ========== //
 
+// ---- Puzzle list cache ----
+// In-memory cache for listPuzzles results. Keyed by filter+pagination+userId.
+// TTL-based expiration, no external dependencies.
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 1000;
+const CACHE_SWEEP_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+
+interface PuzzleListCacheEntry {
+  data: {pid: string; content: PuzzleJson; times_solved: number; is_public: boolean}[];
+  expiresAt: number;
+}
+
+const puzzleListCache = new Map<string, PuzzleListCacheEntry>();
+
+// Periodic sweep to evict expired entries and prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of puzzleListCache) {
+    if (entry.expiresAt <= now) puzzleListCache.delete(key);
+  }
+}, CACHE_SWEEP_INTERVAL_MS).unref();
+
+function buildCacheKey(
+  filter: ListPuzzleRequestFilters,
+  limit: number,
+  offset: number,
+  userId?: string
+): string {
+  return `${JSON.stringify(filter)}:${limit}:${offset}:${userId || 'anon'}`;
+}
+
+function clearCacheForUser(userId: string): void {
+  const suffix = `:${userId}`;
+  for (const key of puzzleListCache.keys()) {
+    if (key.endsWith(suffix)) puzzleListCache.delete(key);
+  }
+}
+
+export function clearPuzzleListCache(): void {
+  puzzleListCache.clear();
+}
+
 export async function getPuzzle(pid: string): Promise<PuzzleJson | null> {
   const {rows} = await pool.query(
     `
@@ -113,6 +155,14 @@ export async function listPuzzles(
     is_public: boolean;
   }[]
 > {
+  // Check cache
+  const cacheKey = buildCacheKey(filter, limit, offset, userId);
+  const cached = puzzleListCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+  if (cached) puzzleListCache.delete(cacheKey);
+
   const parametersForTitleAuthorFilter = filter.nameOrTitleFilter.split(/\s/).map((s) => `%${s}%`);
   const parameterOffset = 3;
   // we create the query this way as POSTGRES optimizer does not use the index for an ILIKE ALL clause, but will for multiple ANDs
@@ -190,6 +240,11 @@ export async function listPuzzles(
       } as PuzzleJson,
     })
   );
+  // Store in cache (skip if at capacity — entries will free up via TTL)
+  if (puzzleListCache.size < MAX_CACHE_SIZE) {
+    puzzleListCache.set(cacheKey, {data: puzzles, expiresAt: Date.now() + CACHE_TTL_MS});
+  }
+
   return puzzles;
 }
 
@@ -263,6 +318,9 @@ export async function addPuzzle(
       VALUES ($1, to_timestamp($2), $3, $4, $5, $6, $7)`,
     [puzzleId, uploaded_at / 1000, isPublic, puzzle, puzzleId, contentHash, uploadedBy || null]
   );
+  // Clear uploader's cached puzzle list so they see their new puzzle immediately
+  if (uploadedBy) clearCacheForUser(uploadedBy);
+
   return {pid: puzzleId, duplicate: false};
 }
 

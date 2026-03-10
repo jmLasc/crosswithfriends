@@ -10,11 +10,13 @@ import {
   addPuzzle,
   recordSolve,
   getPuzzleInfo,
+  clearPuzzleListCache,
 } from '../../model/puzzle';
 
 describe('listPuzzles', () => {
   beforeEach(() => {
     resetPoolMocks();
+    clearPuzzleListCache();
   });
 
   const defaultFilter = {
