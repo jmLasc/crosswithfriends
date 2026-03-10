@@ -61,6 +61,7 @@ jobs:
     name: Playwright E2E
     needs: wait-for-deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
