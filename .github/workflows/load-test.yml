@@ -78,7 +78,10 @@ jobs:
 
       - name: Start backend server
         env:
-          DATABASE_URL: postgres://dfacadmin:testpassword@localhost:5432/crosswithfriends
+          PGHOST: localhost
+          PGUSER: dfacadmin
+          PGPASSWORD: testpassword
+          PGDATABASE: crosswithfriends
           JWT_SECRET: load-test-secret-key-not-for-production
           NODE_ENV: test
           PORT: 3021
@@ -110,6 +113,12 @@ jobs:
           K6_PROFILE: ${{ github.event.inputs.profile || 'smoke' }}
           BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:3021' }}
         run: k6 run loadtest/api-auth.js --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)"
+
+      - name: Run API write tests
+        env:
+          K6_PROFILE: ${{ github.event.inputs.profile || 'smoke' }}
+          BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:3021' }}
+        run: k6 run loadtest/api-write.js --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)"
 
       - name: Run WebSocket tests
         env:

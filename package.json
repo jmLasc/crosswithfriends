@@ -144,7 +144,7 @@
     "loadtest:auth": "pnpm loadtest:seed && k6 run loadtest/api-auth.js",
     "loadtest:ws": "pnpm loadtest:seed && k6 run loadtest/websocket.js",
     "loadtest:write": "pnpm loadtest:seed && k6 run loadtest/api-write.js",
-    "loadtest:all": "pnpm loadtest:seed && k6 run loadtest/api-read.js && k6 run loadtest/api-auth.js && k6 run loadtest/websocket.js",
+    "loadtest:all": "pnpm loadtest:seed && k6 run loadtest/api-read.js && k6 run loadtest/api-auth.js && k6 run loadtest/api-write.js && k6 run loadtest/websocket.js",
     "loadtest:smoke": "K6_PROFILE=smoke pnpm loadtest:all",
     "loadtest:full": "K6_PROFILE=load pnpm loadtest:all",
     "loadtest:stress": "K6_PROFILE=stress pnpm loadtest:all"
