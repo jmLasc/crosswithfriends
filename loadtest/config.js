@@ -10,11 +10,8 @@ export const BASE_URL = __ENV.BASE_URL || 'http://localhost:3021';
 // Safety: block load tests against production
 const PROD_HOSTS = ['crosswithfriends.com', 'www.crosswithfriends.com'];
 const urlHost = BASE_URL.replace(/^https?:\/\//, '').split(/[:/]/)[0];
-if (PROD_HOSTS.includes(urlHost) && !__ENV.I_KNOW_WHAT_IM_DOING) {
-  throw new Error(
-    'Refusing to run load tests against production. ' +
-      'Set I_KNOW_WHAT_IM_DOING=1 to override (not recommended).'
-  );
+if (PROD_HOSTS.includes(urlHost)) {
+  throw new Error('Refusing to run load tests against production.');
 }
 
 // Default thresholds – the load test fails CI if any of these are breached.

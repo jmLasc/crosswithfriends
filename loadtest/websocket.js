@@ -13,9 +13,8 @@
 import ws from 'k6/ws';
 import {check, sleep} from 'k6';
 import {Rate, Counter, Trend} from 'k6/metrics';
-import {getStages} from './config.js';
+import {BASE_URL, getStages} from './config.js';
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:3021';
 const WS_URL = BASE_URL.replace(/^http/, 'ws');
 
 const connectionDuration = new Trend('ws_connection_duration', true);
