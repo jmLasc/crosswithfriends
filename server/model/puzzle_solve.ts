@@ -1,29 +1,16 @@
 import {pool} from './pool';
 import {dayOfWeekExtract} from './sql_helpers';
+import {TTLCache} from './ttl_cache';
 
 // ---- In-memory TTL cache for in-progress games ----
-const IN_PROGRESS_CACHE_TTL_MS = 60 * 1000; // 60 seconds
-const IN_PROGRESS_MAX_CACHE_SIZE = 500;
-
-interface InProgressCacheEntry {
-  data: InProgressGameItem[];
-  expiresAt: number;
-}
-
-const inProgressGamesCache = new Map<string, InProgressCacheEntry>();
-
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [key, entry] of inProgressGamesCache) {
-      if (entry.expiresAt <= now) inProgressGamesCache.delete(key);
-    }
-  },
-  5 * 60 * 1000
-).unref();
+const inProgressGamesCache = new TTLCache<InProgressGameItem[]>({ttlMs: 60_000, maxSize: 500});
 
 export function clearInProgressGamesCache(): void {
   inProgressGamesCache.clear();
+}
+
+export function invalidateInProgressCacheForUser(userId: string): void {
+  inProgressGamesCache.delete(userId);
 }
 
 export type UserSolveHistoryItem = {
@@ -178,7 +165,7 @@ export type InProgressGameItem = {
 
 export async function getInProgressGames(userId: string): Promise<InProgressGameItem[]> {
   const cached = inProgressGamesCache.get(userId);
-  if (cached && cached.expiresAt > Date.now()) return cached.data;
+  if (cached) return cached;
 
   // Look up the user's legacy dfac_id(s)
   const idResult = await pool.query('SELECT dfac_id FROM user_identity_map WHERE user_id = $1', [userId]);
@@ -252,8 +239,7 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
     percentComplete: 0,
   }));
 
-  if (inProgressGamesCache.size >= IN_PROGRESS_MAX_CACHE_SIZE) inProgressGamesCache.clear();
-  inProgressGamesCache.set(userId, {data: items, expiresAt: Date.now() + IN_PROGRESS_CACHE_TTL_MS});
+  inProgressGamesCache.set(userId, items);
 
   return items;
 }

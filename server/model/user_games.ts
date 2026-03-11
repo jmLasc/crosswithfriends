@@ -1,5 +1,6 @@
 import {pool} from './pool';
 import {getDfacIdsForUser} from './user';
+import {TTLCache} from './ttl_cache';
 
 export type PuzzleStatusMap = {[pid: string]: 'solved' | 'started'};
 
@@ -13,39 +14,24 @@ export type UserGameItem = {
 };
 
 // ---- In-memory TTL caches ----
-const CACHE_TTL_MS = 60 * 1000; // 60 seconds
-const MAX_CACHE_SIZE = 500;
-const CACHE_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
-
-interface CacheEntry<T> {
-  data: T;
-  expiresAt: number;
-}
-
-const guestPuzzleStatusCache = new Map<string, CacheEntry<PuzzleStatusMap>>();
-const userGamesForPuzzleCache = new Map<string, CacheEntry<UserGameItem[]>>();
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of guestPuzzleStatusCache) {
-    if (entry.expiresAt <= now) guestPuzzleStatusCache.delete(key);
-  }
-  for (const [key, entry] of userGamesForPuzzleCache) {
-    if (entry.expiresAt <= now) userGamesForPuzzleCache.delete(key);
-  }
-}, CACHE_SWEEP_INTERVAL_MS).unref();
+// Cache key format for userGamesForPuzzleCache: "pid:dfacId1,dfacId2:userId"
+const guestPuzzleStatusCache = new TTLCache<PuzzleStatusMap>({ttlMs: 60_000, maxSize: 500});
+const userGamesForPuzzleCache = new TTLCache<UserGameItem[]>({ttlMs: 60_000, maxSize: 500});
 
 export function clearUserGamesCache(): void {
   guestPuzzleStatusCache.clear();
   userGamesForPuzzleCache.clear();
 }
 
-/** Invalidate caches for a specific user/dfacId (e.g. after game creation or solve). */
+/** Invalidate caches for a specific user/dfacId (e.g. after game creation or dismiss). */
 export function invalidateUserGamesCacheForUser(dfacId: string): void {
   guestPuzzleStatusCache.delete(dfacId);
-  for (const key of userGamesForPuzzleCache.keys()) {
-    if (key.includes(dfacId)) userGamesForPuzzleCache.delete(key);
-  }
+  // Cache key format: "pid:dfacId1,dfacId2:userId"
+  // Match dfacId precisely within the comma-separated dfacIds segment
+  userGamesForPuzzleCache.deleteWhere((key) => {
+    const dfacSegment = key.split(':')[1];
+    return dfacSegment !== undefined && dfacSegment.split(',').includes(dfacId);
+  });
 }
 
 /**
@@ -58,7 +44,7 @@ export function invalidateUserGamesCacheForUser(dfacId: string): void {
  */
 export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStatusMap> {
   const cached = guestPuzzleStatusCache.get(dfacId);
-  if (cached && cached.expiresAt > Date.now()) return cached.data;
+  if (cached) return cached;
 
   const result = await pool.query(
     `SELECT pid, CASE WHEN bool_or(solved) THEN 'solved' ELSE 'started' END AS status
@@ -92,8 +78,7 @@ export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStat
     statuses[row.pid] = row.status;
   }
 
-  if (guestPuzzleStatusCache.size >= MAX_CACHE_SIZE) guestPuzzleStatusCache.clear();
-  guestPuzzleStatusCache.set(dfacId, {data: statuses, expiresAt: Date.now() + CACHE_TTL_MS});
+  guestPuzzleStatusCache.set(dfacId, statuses);
 
   return statuses;
 }
@@ -131,7 +116,7 @@ export async function getUserGamesForPuzzle(
 
   const cacheKey = `${pid}:${dfacIds.sort().join(',')}:${options.userId || ''}`;
   const cached = userGamesForPuzzleCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) return cached.data;
+  if (cached) return cached;
 
   // Find games where the user participated AND the game is for the requested puzzle.
   // Combines game_events (v2) with firebase_history (legacy).
@@ -187,8 +172,7 @@ export async function getUserGamesForPuzzle(
     percentComplete: r.solved ? 100 : 0,
   }));
 
-  if (userGamesForPuzzleCache.size >= MAX_CACHE_SIZE) userGamesForPuzzleCache.clear();
-  userGamesForPuzzleCache.set(cacheKey, {data: items, expiresAt: Date.now() + CACHE_TTL_MS});
+  userGamesForPuzzleCache.set(cacheKey, items);
 
   return items;
 }
