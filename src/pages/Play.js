@@ -107,7 +107,7 @@ class Play extends Component {
     this.setState({creating: true, error: null});
     actions.getNextGid(async (gid) => {
       try {
-        await createGame({gid, pid: this.pid});
+        await createGame({gid, pid: this.pid, dfac_id: getLocalId()});
         redirect(this.is_fencing ? `/fencing/${gid}` : `/beta/game/${gid}`);
       } catch (e) {
         console.error('Failed to create game:', e);
@@ -121,7 +121,7 @@ class Play extends Component {
     this.setState({creating: true, error: null});
     actions.getNextGid(async (gid) => {
       try {
-        await createGame({gid, pid: this.pid});
+        await createGame({gid, pid: this.pid, dfac_id: getLocalId()});
         redirect(`/fencing/${gid}`);
       } catch (e) {
         console.error('Failed to create fencing game:', e);

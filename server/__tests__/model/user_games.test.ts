@@ -2,11 +2,12 @@ import {pool, resetPoolMocks} from '../../__mocks__/pool';
 
 jest.mock('../../model/pool', () => require('../../__mocks__/pool'));
 
-import {getUserGamesForPuzzle} from '../../model/user_games';
+import {getUserGamesForPuzzle, clearUserGamesCache} from '../../model/user_games';
 
 describe('getUserGamesForPuzzle', () => {
   beforeEach(() => {
     resetPoolMocks();
+    clearUserGamesCache();
   });
 
   it('returns empty array when no dfacIds can be resolved', async () => {

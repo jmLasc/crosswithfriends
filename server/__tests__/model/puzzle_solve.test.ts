@@ -2,11 +2,17 @@ import {pool, resetPoolMocks} from '../../__mocks__/pool';
 
 jest.mock('../../model/pool', () => require('../../__mocks__/pool'));
 
-import {getInProgressGames, getUserSolveStats, backfillSolvesForDfacId} from '../../model/puzzle_solve';
+import {
+  getInProgressGames,
+  getUserSolveStats,
+  backfillSolvesForDfacId,
+  clearInProgressGamesCache,
+} from '../../model/puzzle_solve';
 
 describe('getInProgressGames', () => {
   beforeEach(() => {
     resetPoolMocks();
+    clearInProgressGamesCache();
   });
 
   it('returns empty array when user has no linked dfac_ids', async () => {

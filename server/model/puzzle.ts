@@ -5,30 +5,18 @@ import * as uuid from 'uuid';
 import {PuzzleJson, ListPuzzleRequestFilters, AddPuzzleResult} from '@shared/types';
 import {pool} from './pool';
 import {dayOfWeekExtract} from './sql_helpers';
+import {TTLCache} from './ttl_cache';
 
 // ================ Read and Write methods used to interface with postgres ========== //
 
+type PuzzleListRow = {pid: string; content: PuzzleJson; times_solved: number; is_public: boolean};
+
 // ---- Puzzle list cache ----
-// In-memory cache for listPuzzles results. Keyed by filter+pagination+userId.
-// TTL-based expiration, no external dependencies.
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_SIZE = 1000;
-const CACHE_SWEEP_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
-
-interface PuzzleListCacheEntry {
-  data: {pid: string; content: PuzzleJson; times_solved: number; is_public: boolean}[];
-  expiresAt: number;
-}
-
-const puzzleListCache = new Map<string, PuzzleListCacheEntry>();
-
-// Periodic sweep to evict expired entries and prevent unbounded growth
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of puzzleListCache) {
-    if (entry.expiresAt <= now) puzzleListCache.delete(key);
-  }
-}, CACHE_SWEEP_INTERVAL_MS).unref();
+const puzzleListCache = new TTLCache<PuzzleListRow[]>({
+  ttlMs: 5 * 60 * 1000, // 5 minutes
+  maxSize: 1000,
+  sweepIntervalMs: 10 * 60 * 1000,
+});
 
 function buildCacheKey(
   filter: ListPuzzleRequestFilters,
@@ -41,9 +29,7 @@ function buildCacheKey(
 
 function clearCacheForUser(userId: string): void {
   const suffix = `:${userId}`;
-  for (const key of puzzleListCache.keys()) {
-    if (key.endsWith(suffix)) puzzleListCache.delete(key);
-  }
+  puzzleListCache.deleteWhere((key) => key.endsWith(suffix));
 }
 
 export function clearPuzzleListCache(): void {
@@ -158,10 +144,7 @@ export async function listPuzzles(
   // Check cache
   const cacheKey = buildCacheKey(filter, limit, offset, userId);
   const cached = puzzleListCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.data;
-  }
-  if (cached) puzzleListCache.delete(cacheKey);
+  if (cached) return cached;
 
   const parametersForTitleAuthorFilter = filter.nameOrTitleFilter.split(/\s/).map((s) => `%${s}%`);
   const parameterOffset = 3;
@@ -240,10 +223,7 @@ export async function listPuzzles(
       } as PuzzleJson,
     })
   );
-  // Store in cache (skip if at capacity — entries will free up via TTL)
-  if (puzzleListCache.size < MAX_CACHE_SIZE) {
-    puzzleListCache.set(cacheKey, {data: puzzles, expiresAt: Date.now() + CACHE_TTL_MS});
-  }
+  puzzleListCache.set(cacheKey, puzzles);
 
   return puzzles;
 }

@@ -3,10 +3,12 @@ import express from 'express';
 import {CreateGameResponse, CreateGameRequest, InfoJson, GetGameResponse} from '../../src/shared/types';
 
 import {addInitialGameEvent} from '../model/game';
-import {getPuzzleSolves} from '../model/puzzle_solve';
+import {getPuzzleSolves, invalidateInProgressCacheForUser} from '../model/puzzle_solve';
 import {getPuzzleInfo} from '../model/puzzle';
 import {verifyAccessToken} from '../auth/jwt';
 import {dismissGameForUser, undismissGameForUser} from '../model/game_dismissal';
+import {invalidateUserGamesCacheForUser} from '../model/user_games';
+import {getDfacIdsForUser} from '../model/user';
 
 const router = express.Router();
 
@@ -41,6 +43,10 @@ const router = express.Router();
 router.post<{}, CreateGameResponse | {error: string}, CreateGameRequest>('/', async (req, res, next) => {
   try {
     const gid = await addInitialGameEvent(req.body.gid, req.body.pid);
+    // Invalidate user games cache so the "Your Games" page reflects the new game immediately
+    if (req.body.dfac_id) {
+      invalidateUserGamesCacheForUser(req.body.dfac_id);
+    }
     res.json({gid});
   } catch (e) {
     if (e instanceof Error && e.message.startsWith('Puzzle not found')) {
@@ -141,6 +147,10 @@ router.post<{gid: string}>('/:gid/dismiss', async (req, res, next) => {
 
     // Per-user dismissal — only hides the game for this user
     await dismissGameForUser(payload.userId, gid);
+    // Invalidate caches so dismissed game disappears immediately
+    invalidateInProgressCacheForUser(payload.userId);
+    const dfacIds = await getDfacIdsForUser(payload.userId);
+    for (const dfacId of dfacIds) invalidateUserGamesCacheForUser(dfacId);
     res.sendStatus(204);
   } catch (e) {
     next(e);
@@ -177,6 +187,9 @@ router.post<{gid: string}>('/:gid/undismiss', async (req, res, next) => {
     if (!payload) return res.sendStatus(401);
 
     await undismissGameForUser(payload.userId, gid);
+    invalidateInProgressCacheForUser(payload.userId);
+    const dfacIds = await getDfacIdsForUser(payload.userId);
+    for (const dfacId of dfacIds) invalidateUserGamesCacheForUser(dfacId);
     res.sendStatus(204);
   } catch (e) {
     next(e);

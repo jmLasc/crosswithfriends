@@ -159,6 +159,7 @@ export interface CreateGameResponse {}
 export interface CreateGameRequest {
   gid: string;
   pid: string;
+  dfac_id?: string;
 }
 
 export interface GetGameResponse {

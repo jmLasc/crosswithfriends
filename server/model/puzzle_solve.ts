@@ -1,5 +1,17 @@
 import {pool} from './pool';
 import {dayOfWeekExtract} from './sql_helpers';
+import {TTLCache} from './ttl_cache';
+
+// ---- In-memory TTL cache for in-progress games ----
+const inProgressGamesCache = new TTLCache<InProgressGameItem[]>({ttlMs: 60_000, maxSize: 500});
+
+export function clearInProgressGamesCache(): void {
+  inProgressGamesCache.clear();
+}
+
+export function invalidateInProgressCacheForUser(userId: string): void {
+  inProgressGamesCache.delete(userId);
+}
 
 export type UserSolveHistoryItem = {
   pid: string;
@@ -152,6 +164,9 @@ export type InProgressGameItem = {
 };
 
 export async function getInProgressGames(userId: string): Promise<InProgressGameItem[]> {
+  const cached = inProgressGamesCache.get(userId);
+  if (cached) return cached;
+
   // Look up the user's legacy dfac_id(s)
   const idResult = await pool.query('SELECT dfac_id FROM user_identity_map WHERE user_id = $1', [userId]);
   const dfacIds = idResult.rows.map((r: {dfac_id: string}) => r.dfac_id);
@@ -215,7 +230,7 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
     [dfacIds, userId]
   );
 
-  return result.rows.map((r: any) => ({
+  const items = result.rows.map((r: any) => ({
     gid: r.gid,
     pid: r.pid,
     title: r.title || 'Untitled',
@@ -223,6 +238,10 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
     lastActivity: r.last_activity ? r.last_activity.toISOString() : '',
     percentComplete: 0,
   }));
+
+  inProgressGamesCache.set(userId, items);
+
+  return items;
 }
 
 export async function backfillSolvesForDfacId(userId: string, dfacId: string): Promise<number> {

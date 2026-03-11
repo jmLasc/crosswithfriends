@@ -1,7 +1,38 @@
 import {pool} from './pool';
 import {getDfacIdsForUser} from './user';
+import {TTLCache} from './ttl_cache';
 
 export type PuzzleStatusMap = {[pid: string]: 'solved' | 'started'};
+
+export type UserGameItem = {
+  gid: string;
+  pid: string;
+  solved: boolean;
+  time: number;
+  v2: boolean;
+  percentComplete: number;
+};
+
+// ---- In-memory TTL caches ----
+// Cache key format for userGamesForPuzzleCache: "pid:dfacId1,dfacId2:userId"
+const guestPuzzleStatusCache = new TTLCache<PuzzleStatusMap>({ttlMs: 60_000, maxSize: 500});
+const userGamesForPuzzleCache = new TTLCache<UserGameItem[]>({ttlMs: 60_000, maxSize: 500});
+
+export function clearUserGamesCache(): void {
+  guestPuzzleStatusCache.clear();
+  userGamesForPuzzleCache.clear();
+}
+
+/** Invalidate caches for a specific user/dfacId (e.g. after game creation or dismiss). */
+export function invalidateUserGamesCacheForUser(dfacId: string): void {
+  guestPuzzleStatusCache.delete(dfacId);
+  // Cache key format: "pid:dfacId1,dfacId2:userId"
+  // Match dfacId precisely within the comma-separated dfacIds segment
+  userGamesForPuzzleCache.deleteWhere((key) => {
+    const dfacSegment = key.split(':')[1];
+    return dfacSegment !== undefined && dfacSegment.split(',').includes(dfacId);
+  });
+}
 
 /**
  * Get puzzle statuses (solved/started) for a guest user by dfac_id.
@@ -12,6 +43,9 @@ export type PuzzleStatusMap = {[pid: string]: 'solved' | 'started'};
  *  2. firebase_history (legacy games migrated from Firebase)
  */
 export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStatusMap> {
+  const cached = guestPuzzleStatusCache.get(dfacId);
+  if (cached) return cached;
+
   const result = await pool.query(
     `SELECT pid, CASE WHEN bool_or(solved) THEN 'solved' ELSE 'started' END AS status
      FROM (
@@ -43,6 +77,9 @@ export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStat
   for (const row of result.rows as {pid: string; status: 'solved' | 'started'}[]) {
     statuses[row.pid] = row.status;
   }
+
+  guestPuzzleStatusCache.set(dfacId, statuses);
+
   return statuses;
 }
 
@@ -52,15 +89,6 @@ type UserGameRow = {
   solved: boolean;
   last_activity: Date | null;
   v2: boolean;
-};
-
-export type UserGameItem = {
-  gid: string;
-  pid: string;
-  solved: boolean;
-  time: number;
-  v2: boolean;
-  percentComplete: number;
 };
 
 /**
@@ -85,6 +113,10 @@ export async function getUserGamesForPuzzle(
   if (dfacIds.length === 0) {
     return [];
   }
+
+  const cacheKey = `${pid}:${dfacIds.sort().join(',')}:${options.userId || ''}`;
+  const cached = userGamesForPuzzleCache.get(cacheKey);
+  if (cached) return cached;
 
   // Find games where the user participated AND the game is for the requested puzzle.
   // Combines game_events (v2) with firebase_history (legacy).
@@ -131,7 +163,7 @@ export async function getUserGamesForPuzzle(
 
   const rows: UserGameRow[] = result.rows;
 
-  return rows.map((r) => ({
+  const items = rows.map((r) => ({
     gid: r.gid,
     pid: r.pid,
     solved: r.solved,
@@ -139,4 +171,8 @@ export async function getUserGamesForPuzzle(
     v2: r.v2,
     percentComplete: r.solved ? 100 : 0,
   }));
+
+  userGamesForPuzzleCache.set(cacheKey, items);
+
+  return items;
 }
