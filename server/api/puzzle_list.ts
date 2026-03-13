@@ -90,6 +90,9 @@ router.get<{}, ListPuzzleResponse>('/', optionalAuth, async (req, res, next) => 
       stats: {numSolves: puzzle.times_solved},
       isPublic: puzzle.is_public,
     }));
+    // Authenticated responses include the user's unlisted puzzles, so must not be publicly cached
+    const cacheScope = req.authUser ? 'private' : 'public';
+    res.set('Cache-Control', `${cacheScope}, max-age=60, stale-while-revalidate=300`);
     res.json({
       puzzles,
     });
