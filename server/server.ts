@@ -18,6 +18,7 @@ import passport from './auth/passport';
 import {optionalAuth} from './auth/middleware';
 import {cleanupExpiredTokens} from './model/refresh_token';
 import {cleanupExpiredEmailTokens, cleanupExpiredResetTokens} from './model/email_token';
+import {ogTagsMiddleware} from './middleware/ogTags';
 
 const app = express();
 app.set('trust proxy', 1); // trust first proxy (Render) so req.ip reflects the real client
@@ -72,6 +73,9 @@ app.get('/api/version', (_req, res) => {
     env: process.env.NODE_ENV || 'development',
   });
 });
+
+// Serve dynamic OG meta tags for link-expanding bots (iMessage, Discord, Slack, etc.)
+app.use(ogTagsMiddleware);
 
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', apiRouter);
