@@ -56,8 +56,14 @@ export interface UserStatsResponse {
   isPrivate?: boolean;
   stats?: {
     totalSolved: number;
+    totalSolvedSolo: number;
+    totalSolvedCoop: number;
     bySize: SizeStats[];
     byDay: DayOfWeekStats[];
+    bySizeSolo: SizeStats[];
+    bySizeCoop: SizeStats[];
+    byDaySolo: DayOfWeekStats[];
+    byDayCoop: DayOfWeekStats[];
   };
   history?: SolveHistoryItem[];
   uploads?: UploadedPuzzle[];

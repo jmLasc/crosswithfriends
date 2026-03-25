@@ -27,6 +27,37 @@
   font-size: 14px;
 }
 
+.profile--stats-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.profile--stats-tab {
+  padding: 6px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+}
+
+.profile--stats-tab:hover {
+  background-color: #f5f5f5;
+}
+
+.profile--stats-tab--active {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+.profile--stats-tab--active:hover {
+  background-color: #1565c0;
+}
+
 .profile--stats-grid {
   display: flex;
   gap: 12px;
@@ -211,6 +242,25 @@
 }
 
 /* Dark mode */
+.dark .profile--stats-tab {
+  border-color: #444;
+  color: rgb(255 255 255 / 50%);
+}
+
+.dark .profile--stats-tab:hover {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.dark .profile--stats-tab--active {
+  background-color: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+.dark .profile--stats-tab--active:hover {
+  background-color: #1565c0;
+}
+
 .dark .profile--header h2 {
   color: var(--dark-primary-text);
 }
