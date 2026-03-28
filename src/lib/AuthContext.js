@@ -68,6 +68,12 @@ export function AuthProvider({children}) {
   const refreshTimerRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const pendingPrefsRef = useRef({});
+  const accessTokenRef = useRef(accessToken);
+
+  // Keep ref in sync so debounced callbacks use the latest token
+  useEffect(() => {
+    accessTokenRef.current = accessToken;
+  }, [accessToken]);
 
   // Sync auth token to socket connection
   useEffect(() => {
@@ -138,33 +144,32 @@ export function AuthProvider({children}) {
     if (me) setUser(me);
   }, [accessToken]);
 
-  const savePreference = useCallback(
-    (key, value) => {
-      // Update localStorage immediately
-      const mapping = PREF_STORAGE_MAP[key];
-      if (mapping?.key) {
-        try {
-          localStorage.setItem(mapping.key, mapping.type === 'json' ? JSON.stringify(value) : value);
-        } catch {
-          // localStorage may be unavailable
-        }
+  const savePreference = useCallback((key, value) => {
+    // Update localStorage immediately
+    const mapping = PREF_STORAGE_MAP[key];
+    if (mapping?.key) {
+      try {
+        localStorage.setItem(mapping.key, mapping.type === 'json' ? JSON.stringify(value) : value);
+      } catch {
+        // localStorage may be unavailable
       }
+    }
 
-      // Update local state
-      setPreferences((prev) => ({...prev, [key]: value}));
+    // Update local state
+    setPreferences((prev) => ({...prev, [key]: value}));
 
-      // Debounced server write for authenticated users
-      if (!accessToken) return;
-      pendingPrefsRef.current[key] = value;
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = setTimeout(() => {
-        const pending = {...pendingPrefsRef.current};
-        pendingPrefsRef.current = {};
-        updatePreferences(accessToken, pending).catch(() => {});
-      }, 500);
-    },
-    [accessToken]
-  );
+    // Debounced server write for authenticated users
+    if (!accessTokenRef.current) return;
+    pendingPrefsRef.current[key] = value;
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      const pending = {...pendingPrefsRef.current};
+      pendingPrefsRef.current = {};
+      if (accessTokenRef.current) {
+        updatePreferences(accessTokenRef.current, pending).catch(() => {});
+      }
+    }, 500);
+  }, []);
 
   const value = {
     user,
