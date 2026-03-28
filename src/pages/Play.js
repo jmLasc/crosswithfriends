@@ -20,6 +20,17 @@ import AuthContext from '../lib/AuthContext';
 
 import withRouter from '../lib/withRouter';
 
+function describeGameError(e) {
+  const msg = e?.message || '';
+  if (msg.includes('Server error')) {
+    return 'The server returned an error. Please try again in a moment.';
+  }
+  if (e?.name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+    return 'Unable to reach the server. This may be caused by a browser extension, firewall, or network issue. Try disabling ad blockers or VPNs and refreshing.';
+  }
+  return 'Unable to create game. Please check your connection and try again.';
+}
+
 class Play extends Component {
   static contextType = AuthContext;
   constructor() {
@@ -122,11 +133,8 @@ class Play extends Component {
         }
       })
       .catch((e) => {
-        console.warn('Failed to create game:', e);
-        this.setState({
-          creating: false,
-          error: 'Unable to create game. Please check your connection and try again.',
-        });
+        Sentry.captureException(e, {extra: {phase: 'getNextGid', pid: this.pid}});
+        this.setState({creating: false, error: describeGameError(e)});
       });
   }
 
@@ -144,11 +152,8 @@ class Play extends Component {
         }
       })
       .catch((e) => {
-        console.warn('Failed to create fencing game:', e);
-        this.setState({
-          creating: false,
-          error: 'Unable to create game. Please check your connection and try again.',
-        });
+        Sentry.captureException(e, {extra: {phase: 'getNextGid', pid: this.pid}});
+        this.setState({creating: false, error: describeGameError(e)});
       });
   }
 
