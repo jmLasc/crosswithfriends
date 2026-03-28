@@ -21,6 +21,7 @@ import {
   markEmailVerified,
   findUserByEmail,
   updateProfileVisibility,
+  updateUserPreferences,
   EmailCollisionError,
   UserRow,
 } from '../model/user';
@@ -112,6 +113,7 @@ function buildTokenResponse(user: UserRow, accessToken: string) {
       hasPassword: !!user.password_hash,
       hasGoogle: !!user.oauth_id,
       profileIsPublic: !!user.profile_is_public,
+      preferences: user.preferences || {},
     },
   };
 }
@@ -493,6 +495,7 @@ router.get('/me', requireAuth, async (req, res) => {
     hasPassword: user.has_password,
     hasGoogle: user.has_google,
     profileIsPublic: !!user.profile_is_public,
+    preferences: user.preferences || {},
   });
 });
 
@@ -572,6 +575,58 @@ router.post('/profile-visibility', authLimiter, requireAuth, async (req, res) =>
   }
   await updateProfileVisibility(req.authUser!.userId, isPublic);
   res.json({ok: true, profileIsPublic: isPublic});
+});
+
+const preferencesSchema = Joi.object({
+  vimMode: Joi.boolean(),
+  skipFilledSquares: Joi.boolean(),
+  autoAdvanceCursor: Joi.boolean(),
+  showProgress: Joi.boolean(),
+  darkMode: Joi.string().valid('0', '1', '2'),
+  colorAttribution: Joi.boolean(),
+}).unknown(false);
+
+/**
+ * @openapi
+ * /auth/preferences:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Update user game preferences
+ *     security: [{bearerAuth: []}]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               vimMode: {type: boolean}
+ *               skipFilledSquares: {type: boolean}
+ *               autoAdvanceCursor: {type: boolean}
+ *               showProgress: {type: boolean}
+ *               darkMode: {type: string, enum: ['0', '1', '2']}
+ *               colorAttribution: {type: boolean}
+ *     responses:
+ *       200:
+ *         description: Preferences updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 ok: {type: boolean}
+ *                 preferences: {type: object}
+ *       400: {description: Invalid input}
+ *       429: {description: Rate limited}
+ */
+router.put('/preferences', authLimiter, requireAuth, async (req, res) => {
+  const {error, value} = preferencesSchema.validate(req.body);
+  if (error) {
+    res.status(400).json({error: error.details[0].message});
+    return;
+  }
+  const updated = await updateUserPreferences(req.authUser!.userId, value);
+  res.json({ok: true, preferences: updated});
 });
 
 /**

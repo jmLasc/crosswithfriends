@@ -227,6 +227,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const newVimMode = !prevState.vimMode;
       localStorage.setItem(vimModeKey, JSON.stringify(newVimMode));
+      this.props.onPreferenceChange?.('vimMode', newVimMode);
       return {vimMode: newVimMode};
     });
   };
@@ -254,7 +255,8 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const skipFilledSquares = !prevState.skipFilledSquares;
       localStorage.setItem(skipFilledSquaresKey, JSON.stringify(skipFilledSquares));
-      return {skipFilledSquares: skipFilledSquares};
+      this.props.onPreferenceChange?.('skipFilledSquares', skipFilledSquares);
+      return {skipFilledSquares};
     });
   };
 
@@ -262,6 +264,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const autoAdvanceCursor = !prevState.autoAdvanceCursor;
       localStorage.setItem(autoAdvanceCursorKey, JSON.stringify(autoAdvanceCursor));
+      this.props.onPreferenceChange?.('autoAdvanceCursor', autoAdvanceCursor);
       return {autoAdvanceCursor};
     });
   };
@@ -270,6 +273,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const showProgress = !prevState.showProgress;
       localStorage.setItem(showProgressKey, JSON.stringify(showProgress));
+      this.props.onPreferenceChange?.('showProgress', showProgress);
       return {showProgress};
     });
   };
@@ -505,7 +509,11 @@ export default class Game extends Component {
         onToggleExpandMenu={this.handleToggleExpandMenu}
         colorAttributionMode={this.state.colorAttributionMode}
         onToggleColorAttributionMode={() => {
-          this.setState((prevState) => ({colorAttributionMode: !prevState.colorAttributionMode}));
+          this.setState((prevState) => {
+            const colorAttributionMode = !prevState.colorAttributionMode;
+            this.props.onPreferenceChange?.('colorAttribution', colorAttributionMode);
+            return {colorAttributionMode};
+          });
         }}
         onRefocus={this.handleRefocus}
         unreads={this.props.unreads}

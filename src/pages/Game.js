@@ -390,6 +390,7 @@ class Game extends Component {
         replayRetained={this.state.replayRetained}
         savingReplay={this.state.savingReplay}
         isAuthenticated={this.context?.isAuthenticated}
+        onPreferenceChange={this.context?.savePreference}
       />
     );
   }

@@ -21,6 +21,7 @@ export interface UserRow {
   updated_at: Date;
   email_verified_at?: Date | null;
   profile_is_public: boolean;
+  preferences: Record<string, unknown>;
 }
 
 export interface UserProfile extends UserRow {
@@ -37,7 +38,7 @@ export async function createLocalUser(
   const res = await pool.query(
     `INSERT INTO users (email, password_hash, display_name, auth_provider)
      VALUES ($1, $2, $3, 'local')
-     RETURNING id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public`,
+     RETURNING id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public, preferences`,
     [email.toLowerCase(), passwordHash, displayName]
   );
   return res.rows[0];
@@ -45,7 +46,7 @@ export async function createLocalUser(
 
 export async function findUserByEmail(email: string): Promise<(UserRow & {password_hash: string}) | null> {
   const res = await pool.query(
-    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public
+    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public, preferences
      FROM users
      WHERE email = $1 AND deleted_at IS NULL`,
     [email.toLowerCase()]
@@ -62,7 +63,7 @@ export async function findOrCreateGoogleUser(
 
   // Check if a user already has this Google oauth_id linked (any auth_provider)
   const byOauth = await pool.query(
-    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public
+    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public, preferences
      FROM users
      WHERE oauth_id = $1 AND deleted_at IS NULL`,
     [googleId]
@@ -91,7 +92,7 @@ export async function findOrCreateGoogleUser(
        VALUES ($1, $2, 'google', $3, NOW())
        ON CONFLICT (auth_provider, oauth_id) WHERE oauth_id IS NOT NULL
        DO UPDATE SET updated_at = NOW()
-       RETURNING id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public`,
+       RETURNING id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public, preferences`,
       [lowerEmail, displayName, googleId]
     );
     return res.rows[0];
@@ -107,7 +108,7 @@ export async function findOrCreateGoogleUser(
 
 export async function getUserById(id: string): Promise<UserRow | null> {
   const res = await pool.query(
-    `SELECT id, email, display_name, auth_provider, oauth_id, created_at, updated_at, profile_is_public
+    `SELECT id, email, display_name, auth_provider, oauth_id, created_at, updated_at, profile_is_public, preferences
      FROM users
      WHERE id = $1 AND deleted_at IS NULL`,
     [id]
@@ -142,7 +143,7 @@ export async function getUserIdByDfacId(dfacId: string): Promise<string | null> 
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
   const res = await pool.query(
-    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public
+    `SELECT id, email, password_hash, display_name, auth_provider, oauth_id, created_at, updated_at, email_verified_at, profile_is_public, preferences
      FROM users
      WHERE id = $1 AND deleted_at IS NULL`,
     [id]
@@ -239,4 +240,18 @@ export async function updateProfileVisibility(userId: string, isPublic: boolean)
     isPublic,
     userId,
   ]);
+}
+
+export async function updateUserPreferences(
+  userId: string,
+  preferences: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const res = await pool.query(
+    `UPDATE users
+     SET preferences = preferences || $1::jsonb, updated_at = NOW()
+     WHERE id = $2 AND deleted_at IS NULL
+     RETURNING preferences`,
+    [JSON.stringify(preferences), userId]
+  );
+  return res.rows[0]?.preferences || {};
 }

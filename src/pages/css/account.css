@@ -104,3 +104,30 @@
 .dark .account--main a:hover {
   color: var(--dark-primary-text);
 }
+
+/* Game Preferences section */
+.account-pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 0;
+}
+
+.account-pref-row:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dark .account-pref-row:not(:last-child) {
+  border-bottom-color: #333;
+}
+
+.account-pref-row span {
+  font-size: 14px;
+}
+
+.account-pref-row .btn--toggle {
+  min-width: 48px;
+  font-size: 12px;
+  padding: 4px 10px;
+}

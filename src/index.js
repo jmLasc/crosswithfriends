@@ -99,6 +99,35 @@ const DiscordRedirect = () => {
   return null;
 };
 
+function DarkModeSync({darkModePreference, setDarkModePreference}) {
+  const {isAuthenticated, preferences, savePreference} = React.useContext(AuthContext);
+  const prevPrefRef = React.useRef(darkModePreference);
+  const initialSyncDone = React.useRef(false);
+
+  // When server preferences arrive on login, update dark mode state
+  React.useEffect(() => {
+    if (isAuthenticated && preferences?.darkMode != null && !initialSyncDone.current) {
+      initialSyncDone.current = true;
+      if (preferences.darkMode !== darkModePreference) {
+        setDarkModePreference(preferences.darkMode);
+      }
+    }
+    if (!isAuthenticated) {
+      initialSyncDone.current = false;
+    }
+  }, [isAuthenticated, preferences, darkModePreference, setDarkModePreference]);
+
+  // When user toggles dark mode, sync to server
+  React.useEffect(() => {
+    if (prevPrefRef.current !== darkModePreference && isAuthenticated) {
+      savePreference('darkMode', darkModePreference);
+    }
+    prevPrefRef.current = darkModePreference;
+  }, [darkModePreference, isAuthenticated, savePreference]);
+
+  return null;
+}
+
 const Root = () => {
   const urlDarkMode = window.location.search.indexOf('dark') !== -1;
   const savedDarkModePreference = (localStorage && localStorage.getItem(darkModeLocalStorageKey)) || '0';
@@ -135,7 +164,11 @@ const Root = () => {
     <HelmetProvider>
       <Router>
         <AuthProvider>
-          <GlobalContext value={{toggleMolesterMoons, darkModePreference}}>
+          <GlobalContext value={{toggleMolesterMoons, darkModePreference, setDarkModePreference}}>
+            <DarkModeSync
+              darkModePreference={darkModePreference}
+              setDarkModePreference={setDarkModePreference}
+            />
             <div className={clsx('router-wrapper', {mobile: isMobile(), dark: darkMode})}>
               <VerificationGate>
                 <React.Suspense fallback={null}>

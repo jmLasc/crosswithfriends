@@ -1,5 +1,14 @@
 import {SERVER_URL} from './constants';
 
+export interface UserPreferences {
+  vimMode?: boolean;
+  skipFilledSquares?: boolean;
+  autoAdvanceCursor?: boolean;
+  showProgress?: boolean;
+  darkMode?: string;
+  colorAttribution?: boolean;
+}
+
 export interface AuthUser {
   id: string;
   email: string | null;
@@ -8,6 +17,7 @@ export interface AuthUser {
   hasPassword?: boolean;
   hasGoogle?: boolean;
   profileIsPublic?: boolean;
+  preferences?: UserPreferences;
 }
 
 export interface AuthTokens {
@@ -181,4 +191,22 @@ export async function resetPassword(token: string, newPassword: string): Promise
     const err = await resp.json();
     throw new Error(err.error || 'Password reset failed');
   }
+}
+
+export async function updatePreferences(
+  accessToken: string,
+  preferences: Partial<UserPreferences>
+): Promise<UserPreferences> {
+  const resp = await fetch(`${SERVER_URL}/api/auth/preferences`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    credentials: 'include',
+    body: JSON.stringify(preferences),
+  });
+  if (!resp.ok) return {};
+  const data = await resp.json();
+  return data.preferences;
 }
