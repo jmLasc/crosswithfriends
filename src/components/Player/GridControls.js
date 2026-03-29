@@ -524,6 +524,7 @@ export default class GridControls extends Component {
           autoCapitalize="none"
           data-1p-ignore
           data-lpignore="true"
+          data-bw-ignore="true"
           data-form-type="other"
           aria-hidden="true"
         />
