@@ -398,7 +398,7 @@ export const reduce = (game, action, options = {}) => {
     result = reducers[type](result, params, timestamp);
 
     result = checkSolved(result);
-    const clockNeutral = type === 'updateDisplayName';
+    const clockNeutral = ['updateDisplayName', 'updateColor'].includes(type);
     const isPause = clockNeutral
       ? (result.clock?.paused ?? true)
       : (type === 'updateClock' && params && params.action === 'pause') || type === 'create' || result.solved;
