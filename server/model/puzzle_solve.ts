@@ -18,6 +18,8 @@ export type UserSolveHistoryItem = {
   gid: string;
   title: string;
   originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   dow: string | null;
   time: number;
@@ -95,6 +97,8 @@ export async function getUserSolveStats(userId: string): Promise<{
          ps.pid, ps.gid, ps.time_taken_to_solve, ps.solved_time, ps.player_count,
          COALESCE(p.content->'info'->>'titleOverride', p.content->'info'->>'title') AS title,
          CASE WHEN p.content->'info'->>'titleOverride' IS NOT NULL THEN p.content->'info'->>'title' END AS original_title,
+         COALESCE(p.content->'info'->>'authorOverride', p.content->'info'->>'author') AS author,
+         CASE WHEN p.content->'info'->>'authorOverride' IS NOT NULL THEN p.content->'info'->>'author' END AS original_author,
          GREATEST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
            || 'x' ||
          LEAST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
@@ -163,6 +167,8 @@ export async function getUserSolveStats(userId: string): Promise<{
       gid: r.gid,
       title: r.title || 'Untitled',
       originalTitle: r.original_title || undefined,
+      author: r.author || undefined,
+      originalAuthor: r.original_author || undefined,
       size: r.size,
       dow: r.dow || null,
       time: Number(r.time_taken_to_solve),
@@ -192,6 +198,8 @@ export type InProgressGameItem = {
   pid: string;
   title: string;
   originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   lastActivity: string;
   percentComplete: number;
@@ -244,6 +252,8 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
          COALESCE(ce.event_payload->'params'->>'pid', fh.pid::text) AS pid,
          COALESCE(p.content->'info'->>'titleOverride', p.content->'info'->>'title', p2.content->'info'->>'titleOverride', p2.content->'info'->>'title', 'Untitled') AS title,
          CASE WHEN COALESCE(p.content->'info'->>'titleOverride', p2.content->'info'->>'titleOverride') IS NOT NULL THEN COALESCE(p.content->'info'->>'title', p2.content->'info'->>'title') END AS original_title,
+         COALESCE(p.content->'info'->>'authorOverride', p.content->'info'->>'author', p2.content->'info'->>'authorOverride', p2.content->'info'->>'author') AS author,
+         CASE WHEN COALESCE(p.content->'info'->>'authorOverride', p2.content->'info'->>'authorOverride') IS NOT NULL THEN COALESCE(p.content->'info'->>'author', p2.content->'info'->>'author') END AS original_author,
          COALESCE(
            GREATEST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
              || 'x' ||
@@ -268,6 +278,8 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
       pid: r.pid,
       title: r.title || 'Untitled',
       originalTitle: r.original_title || undefined,
+      author: r.author || undefined,
+      originalAuthor: r.original_author || undefined,
       size: r.size,
       lastActivity: r.last_activity ? r.last_activity.toISOString() : '',
       percentComplete: 0,

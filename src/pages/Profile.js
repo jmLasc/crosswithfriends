@@ -26,6 +26,14 @@ function formatDate(isoString) {
   return d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
 }
 
+function OriginalLabel({originalTitle, originalAuthor}) {
+  if (!originalTitle && !originalAuthor) return null;
+  const parts = [];
+  if (originalTitle) parts.push(originalTitle);
+  if (originalAuthor) parts.push(`by ${originalAuthor}`);
+  return <span className="profile--original-title">Originally: {parts.join(' ')}</span>;
+}
+
 function CollabTag({playerCount, coSolvers, anonCount}) {
   if (playerCount <= 1) return null;
 
@@ -154,9 +162,7 @@ function HistoryTable({history}) {
             <tr key={`${item.pid}-${item.gid}`}>
               <td>
                 {item.title}
-                {item.originalTitle && (
-                  <span className="profile--original-title">Originally: {item.originalTitle}</span>
-                )}
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
                 <CollabTag
                   playerCount={item.playerCount}
                   coSolvers={item.coSolvers}
@@ -214,9 +220,7 @@ function InProgressTable({inProgress, onRemove}) {
                 <Link to={`/beta/play/${item.pid}`} style={{color: 'inherit'}}>
                   {item.title}
                 </Link>
-                {item.originalTitle && (
-                  <span className="profile--original-title">Originally: {item.originalTitle}</span>
-                )}
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
               </td>
               <td>{item.size}</td>
               <td>{item.percentComplete > 0 ? `${item.percentComplete}%` : '–'}</td>
@@ -269,9 +273,7 @@ function UploadsTable({uploads}) {
                 <Link to={`/beta/play/${item.pid}`} style={{color: 'inherit'}}>
                   {item.title}
                 </Link>
-                {item.originalTitle && (
-                  <span className="profile--original-title">Originally: {item.originalTitle}</span>
-                )}
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
               </td>
               <td>{item.size}</td>
               <td>{item.isPublic ? 'Public' : 'Unlisted'}</td>

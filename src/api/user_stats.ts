@@ -10,6 +10,8 @@ export interface SolveHistoryItem {
   gid: string;
   title: string;
   originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   dow: string | null;
   time: number;
@@ -35,6 +37,8 @@ export interface UploadedPuzzle {
   pid: string;
   title: string;
   originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   uploadedAt: string;
   timesSolved: number;
   size: string;
@@ -46,6 +50,8 @@ export interface InProgressGame {
   pid: string;
   title: string;
   originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   lastActivity: string;
   percentComplete: number;

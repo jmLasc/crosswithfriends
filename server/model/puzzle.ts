@@ -308,6 +308,8 @@ export async function getUserUploadedPuzzles(userId: string) {
     `SELECT pid,
             COALESCE(content->'info'->>'titleOverride', content->'info'->>'title') as title,
             CASE WHEN content->'info'->>'titleOverride' IS NOT NULL THEN content->'info'->>'title' END as original_title,
+            COALESCE(content->'info'->>'authorOverride', content->'info'->>'author') as author,
+            CASE WHEN content->'info'->>'authorOverride' IS NOT NULL THEN content->'info'->>'author' END as original_author,
             uploaded_at, times_solved, is_public,
             jsonb_array_length(content->'grid') as rows,
             jsonb_array_length(content->'grid'->0) as cols
@@ -321,6 +323,8 @@ export async function getUserUploadedPuzzles(userId: string) {
     pid: r.pid,
     title: r.title || 'Untitled',
     originalTitle: r.original_title || undefined,
+    author: r.author || undefined,
+    originalAuthor: r.original_author || undefined,
     uploadedAt: r.uploaded_at,
     timesSolved: Number(r.times_solved),
     size: `${r.rows}x${r.cols}`,
