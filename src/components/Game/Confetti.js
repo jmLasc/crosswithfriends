@@ -1,5 +1,8 @@
 import {Component} from 'react';
 import Confetti from 'react-confetti';
+import jingleSound from '..//..//assets/cwfJingle.mp3';
+
+const jingleAudio = new Audio(jingleSound);
 
 export default class ConfettiWrapper extends Component {
   constructor() {
@@ -8,6 +11,18 @@ export default class ConfettiWrapper extends Component {
       done: false,
       numberOfPieces: 200,
     };
+
+    // jingleAudio.addEventListener("canplay", (event) => {
+    //   console.log("can play through");
+    //   jingleAudio.play();
+    // });
+
+    // jingleAudio.canplay = (event) => {
+    //   console.log("oncanplay");
+    //   jingleAudio.play();
+    // };
+
+    // jingleAudio.play();
     this.handleConfettiComplete = this.handleConfettiComplete.bind(this);
   }
 
@@ -17,6 +32,9 @@ export default class ConfettiWrapper extends Component {
         numberOfPieces: 0,
       });
     }, 7000);
+    if (jingleAudio.readyState) {
+      jingleAudio.play();
+    }
   }
 
   handleConfettiComplete() {
