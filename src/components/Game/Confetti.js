@@ -20,9 +20,12 @@ export default class ConfettiWrapper extends Component {
         numberOfPieces: 0,
       });
     }, 7000);
-    if (jingleAudio.readyState) {
-      jingleAudio.play();
+    if (jingleAudio.readyState > 0) {
+      jingleAudio.currentTime = 0;
     }
+    jingleAudio.play().catch((e) => {
+      console.error('Audio play failed:', e);
+    });
   }
 
   handleConfettiComplete() {
