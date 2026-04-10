@@ -97,10 +97,10 @@ export async function getGuestPuzzleStatuses(dfacId: string): Promise<PuzzleStat
  * without a puzzle_solves record still show as solved.
  */
 export async function getAuthenticatedPuzzleStatuses(userId: string): Promise<PuzzleStatusMap> {
-  const dfacIds = await getDfacIdsForUser(userId);
-  if (dfacIds.length === 0) return {};
-
   return authPuzzleStatusCache.getOrFetch(userId, async () => {
+    const dfacIds = await getDfacIdsForUser(userId);
+    if (dfacIds.length === 0) return {};
+
     const result = await pool.query(
       `SELECT pid, CASE WHEN bool_or(solved) THEN 'solved' ELSE 'started' END AS status
        FROM (

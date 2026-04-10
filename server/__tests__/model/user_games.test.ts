@@ -182,16 +182,15 @@ describe('getAuthenticatedPuzzleStatuses', () => {
     expect(params[0]).toEqual(['dfac-1', 'dfac-2']);
   });
 
-  it('uses cache on second call', async () => {
+  it('uses cache on second call (no DB queries)', async () => {
     // First call: dfac_id lookup + main query
     pool.query.mockResolvedValueOnce({rows: [{dfac_id: 'dfac-abc'}]});
     pool.query.mockResolvedValueOnce({rows: [{pid: 'p1', status: 'solved'}]});
     await getAuthenticatedPuzzleStatuses('user-123');
 
-    // Second call: dfac_id lookup still runs, but main query hits cache
-    pool.query.mockResolvedValueOnce({rows: [{dfac_id: 'dfac-abc'}]});
+    // Second call: entire fetch is cached, no new DB queries
     const result = await getAuthenticatedPuzzleStatuses('user-123');
-    expect(pool.query).toHaveBeenCalledTimes(3); // 2 from first call + 1 dfac_id lookup
+    expect(pool.query).toHaveBeenCalledTimes(2); // only the original 2 calls
     expect(result['p1']).toBe('solved');
   });
 });
