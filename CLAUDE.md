@@ -130,6 +130,16 @@ import * as Sentry from '@sentry/node';
 
 **Source maps**: The `@sentry/vite-plugin` in `vite.config.ts` uploads frontend source maps during `pnpm build` when `SENTRY_AUTH_TOKEN` is set. No token needed for local development.
 
+## Git Operations
+
+- When working with git worktrees, always verify which directory (worktree vs main repo) you are operating in before making edits or git operations. Run `git rev-parse --show-toplevel` to confirm.
+- Before starting work on a feature branch, always run `git fetch origin && git log --oneline -5 origin/master` to check what's already merged. Do not re-implement changes that are already on master.
+- When creating a PR or committing, never include local-only files (e.g., .planning files, STATE.md) unless explicitly asked. Check with the user if unsure.
+
+## Debugging
+
+- Before investigating a bug, ask the user for their hypothesis first. Do not go down multiple rabbit holes exploring unrelated code paths. If you haven't found the root cause after 2 attempts, stop and summarize what you've checked so the user can redirect.
+
 ## Deployment
 
 - **Frontend**: Render Static Site with `/api/*` rewrite proxying to backend (same-origin API calls)

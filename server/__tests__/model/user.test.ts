@@ -27,6 +27,7 @@ import {
   markEmailVerified,
   isEmailVerified,
   updateProfileVisibility,
+  updateUserPreferences,
   EmailCollisionError,
 } from '../../model/user';
 
@@ -41,6 +42,7 @@ const mockUserRow = {
   updated_at: new Date(),
   email_verified_at: null,
   profile_is_public: true,
+  preferences: {},
 };
 
 beforeEach(() => {
@@ -358,5 +360,23 @@ describe('unlinkGoogleAccount', () => {
     const sql = pool.query.mock.calls[0][0] as string;
     expect(sql).toContain('oauth_id = NULL');
     expect(sql).toContain("auth_provider = 'local'");
+  });
+});
+
+describe('updateUserPreferences', () => {
+  it('merges preferences with JSON and returns updated value', async () => {
+    const merged = {vimMode: true, darkMode: '1'};
+    pool.query.mockResolvedValueOnce({rows: [{preferences: merged}]});
+    const result = await updateUserPreferences('u1', {vimMode: true});
+    const params = pool.query.mock.calls[0][1] as any[];
+    expect(params[0]).toBe('{"vimMode":true}');
+    expect(params[1]).toBe('u1');
+    expect(result).toEqual(merged);
+  });
+
+  it('returns empty object when user not found', async () => {
+    pool.query.mockResolvedValueOnce({rows: []});
+    const result = await updateUserPreferences('nonexistent', {vimMode: true});
+    expect(result).toEqual({});
   });
 });

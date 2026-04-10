@@ -10,6 +10,9 @@ export async function incrementGid(): Promise<IncrementGidResponse> {
       'Content-Type': 'application/json',
     },
   });
+  if (!resp.ok) {
+    throw new Error(`Server error (${resp.status})`);
+  }
   return resp.json();
 }
 
@@ -22,5 +25,8 @@ export async function incrementPid(): Promise<IncrementPidResponse> {
       'Content-Type': 'application/json',
     },
   });
+  if (!resp.ok) {
+    throw new Error(`Server error (${resp.status})`);
+  }
   return resp.json();
 }

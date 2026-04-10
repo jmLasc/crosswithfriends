@@ -126,11 +126,13 @@
 }
 
 .dark .toolbar {
-  border-right: none;
-  border-left: none;
-  border-top: none;
   border-bottom-color: #888;
   background-color: var(--dark-background-2);
+}
+
+.dark .toolbar--chat-hidden {
+  border-left: 1px solid #888;
+  border-right: 1px solid #888;
 }
 
 .dark .toolbar--mobile {
@@ -291,6 +293,21 @@
   background-color: rgb(255 255 255 / 20%);
 }
 
+.dark .upload-modal--field-label {
+  color: rgb(255 255 255 / 60%);
+}
+
+.dark .upload-modal--field-input {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: var(--dark-primary-text);
+}
+
+.dark .upload-modal--field-input:focus {
+  border-color: #6aa9f4;
+  box-shadow: 0 0 0 2px rgb(106 169 244 / 25%);
+}
+
 .dark .upload-modal--checkbox-row label {
   color: rgb(255 255 255 / 75%);
 }
@@ -302,6 +319,10 @@
 /* Chat header (puzzle instructions / description) */
 .dark .chat--header--subtitle {
   color: rgb(255 255 255 / 60%);
+}
+
+.dark .chat--header--original {
+  color: rgb(255 255 255 / 35%);
 }
 
 .dark .chat--header--description {
@@ -388,6 +409,10 @@
 .dark .entry--contest {
   color: #f0a050;
   border-color: #f0a050;
+}
+
+.dark .entry--original {
+  color: rgb(255 255 255 / 35%);
 }
 
 .dark .entry--icon.fencing {

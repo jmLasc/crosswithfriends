@@ -26,6 +26,14 @@ function formatDate(isoString) {
   return d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
 }
 
+function OriginalLabel({originalTitle, originalAuthor}) {
+  if (!originalTitle && !originalAuthor) return null;
+  const parts = [];
+  if (originalTitle) parts.push(originalTitle);
+  if (originalAuthor) parts.push(`by ${originalAuthor}`);
+  return <span className="profile--original-title">Originally: {parts.join(' ')}</span>;
+}
+
 function CollabTag({playerCount, coSolvers, anonCount}) {
   if (playerCount <= 1) return null;
 
@@ -62,16 +70,48 @@ function CollabTag({playerCount, coSolvers, anonCount}) {
 
 const DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-function StatsCards({stats}) {
-  const {totalSolved, bySize, byDay} = stats;
+const STATS_MODES = [
+  {key: 'all', label: 'All'},
+  {key: 'solo', label: 'Solo'},
+  {key: 'coop', label: 'Co-op'},
+];
 
+function StatsCards({stats}) {
+  const [mode, setMode] = useState('all');
+
+  const modeData = {
+    all: {total: stats.totalSolved, bySize: stats.bySize, byDay: stats.byDay},
+    solo: {total: stats.totalSolvedSolo, bySize: stats.bySizeSolo, byDay: stats.byDaySolo},
+    coop: {total: stats.totalSolvedCoop, bySize: stats.bySizeCoop, byDay: stats.byDayCoop},
+  };
+
+  const hasModes = stats.totalSolvedSolo > 0 && stats.totalSolvedCoop > 0;
+  const {total, bySize, byDay} = modeData[mode];
   const sortedByDay = byDay ? DAY_ORDER.map((d) => byDay.find((s) => s.day === d)).filter(Boolean) : [];
+
+  const handleTabClick = useCallback((e) => {
+    setMode(e.currentTarget.dataset.mode);
+  }, []);
 
   return (
     <>
+      {hasModes && (
+        <div className="profile--stats-tabs">
+          {STATS_MODES.map((m) => (
+            <button
+              key={m.key}
+              data-mode={m.key}
+              className={`profile--stats-tab${mode === m.key ? ' profile--stats-tab--active' : ''}`}
+              onClick={handleTabClick}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="profile--stats-grid">
         <div className="profile--stat-card">
-          <div className="profile--stat-card--value">{totalSolved}</div>
+          <div className="profile--stat-card--value">{total}</div>
           <div className="profile--stat-card--label">Puzzles Solved</div>
         </div>
         {bySize.map((s) => (
@@ -122,6 +162,7 @@ function HistoryTable({history}) {
             <tr key={`${item.pid}-${item.gid}`}>
               <td>
                 {item.title}
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
                 <CollabTag
                   playerCount={item.playerCount}
                   coSolvers={item.coSolvers}
@@ -179,6 +220,7 @@ function InProgressTable({inProgress, onRemove}) {
                 <Link to={`/beta/play/${item.pid}`} style={{color: 'inherit'}}>
                   {item.title}
                 </Link>
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
               </td>
               <td>{item.size}</td>
               <td>{item.percentComplete > 0 ? `${item.percentComplete}%` : '–'}</td>
@@ -231,6 +273,7 @@ function UploadsTable({uploads}) {
                 <Link to={`/beta/play/${item.pid}`} style={{color: 'inherit'}}>
                   {item.title}
                 </Link>
+                <OriginalLabel originalTitle={item.originalTitle} originalAuthor={item.originalAuthor} />
               </td>
               <td>{item.size}</td>
               <td>{item.isPublic ? 'Public' : 'Unlisted'}</td>

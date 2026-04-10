@@ -61,11 +61,17 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
         .then((stats) => {
           if (stale || !stats) return;
           const statuses: PuzzleStatuses = {};
-          (stats.history || []).forEach((item) => {
-            statuses[item.pid] = 'solved';
-          });
+          // Apply snapshot-based statuses first (fallback from game_snapshots)
+          if (stats.snapshotStatuses) {
+            Object.assign(statuses, stats.snapshotStatuses);
+          }
+          // Overlay in-progress (only if not already marked)
           (stats.inProgress || []).forEach((item) => {
             if (!statuses[item.pid]) statuses[item.pid] = 'started';
+          });
+          // Overlay solved from puzzle_solves (highest priority)
+          (stats.history || []).forEach((item) => {
+            statuses[item.pid] = 'solved';
           });
           updateStatuses(statuses);
         })
@@ -170,8 +176,10 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
           type: puzzle.content.info.type!, // XXX not the best form
         },
         grid: puzzle.content.grid,
-        title: puzzle.content.info.title,
-        author: puzzle.content.info.author,
+        title: puzzle.content.info.titleOverride || puzzle.content.info.title,
+        author: puzzle.content.info.authorOverride || puzzle.content.info.author,
+        originalTitle: puzzle.content.info.titleOverride ? puzzle.content.info.title : undefined,
+        originalAuthor: puzzle.content.info.authorOverride ? puzzle.content.info.author : undefined,
         pid: puzzle.pid,
         stats: puzzle.stats,
         status: pgStatuses[puzzle.pid],
@@ -222,6 +230,8 @@ const NewPuzzleList: React.FC<NewPuzzleListProps> = (props) => {
             grid={entryProps.grid}
             title={entryProps.title}
             author={entryProps.author}
+            originalTitle={entryProps.originalTitle}
+            originalAuthor={entryProps.originalAuthor}
             pid={entryProps.pid}
             stats={entryProps.stats}
             status={entryProps.status}

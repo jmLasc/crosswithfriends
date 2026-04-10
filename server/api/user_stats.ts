@@ -3,6 +3,7 @@ import express from 'express';
 import {getUserSolveStats, getInProgressGames} from '../model/puzzle_solve';
 import {getUserById} from '../model/user';
 import {getUserUploadedPuzzles} from '../model/puzzle';
+import {getAuthenticatedPuzzleStatuses} from '../model/user_games';
 import {verifyAccessToken} from '../auth/jwt';
 
 const router = express.Router();
@@ -71,7 +72,18 @@ router.get('/:userId', async (req, res, next) => {
       return;
     }
 
-    const {totalSolved, bySize, byDay, history} = await getUserSolveStats(userId);
+    const {
+      totalSolved,
+      totalSolvedSolo,
+      totalSolvedCoop,
+      bySize,
+      byDay,
+      bySizeSolo,
+      bySizeCoop,
+      byDaySolo,
+      byDayCoop,
+      history,
+    } = await getUserSolveStats(userId);
 
     let uploads: Awaited<ReturnType<typeof getUserUploadedPuzzles>> = [];
     try {
@@ -82,12 +94,19 @@ router.get('/:userId', async (req, res, next) => {
     }
 
     let inProgress: Awaited<ReturnType<typeof getInProgressGames>> = [];
+    let snapshotStatuses: Awaited<ReturnType<typeof getAuthenticatedPuzzleStatuses>> = {};
     if (isOwner) {
       try {
         inProgress = await getInProgressGames(userId);
       } catch (err) {
         Sentry.captureException(err);
         console.error('getInProgressGames error:', err);
+      }
+      try {
+        snapshotStatuses = await getAuthenticatedPuzzleStatuses(userId);
+      } catch (err) {
+        Sentry.captureException(err);
+        console.error('getAuthenticatedPuzzleStatuses error:', err);
       }
     }
 
@@ -97,10 +116,21 @@ router.get('/:userId', async (req, res, next) => {
         displayName: user.display_name,
         createdAt: user.created_at,
       },
-      stats: {totalSolved, bySize, byDay},
+      stats: {
+        totalSolved,
+        totalSolvedSolo,
+        totalSolvedCoop,
+        bySize,
+        byDay,
+        bySizeSolo,
+        bySizeCoop,
+        byDaySolo,
+        byDayCoop,
+      },
       history,
       uploads,
       inProgress,
+      snapshotStatuses,
     });
   } catch (e) {
     next(e);

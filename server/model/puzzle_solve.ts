@@ -17,6 +17,9 @@ export type UserSolveHistoryItem = {
   pid: string;
   gid: string;
   title: string;
+  originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   dow: string | null;
   time: number;
@@ -40,19 +43,27 @@ export type DayOfWeekStats = {
 
 export async function getUserSolveStats(userId: string): Promise<{
   totalSolved: number;
+  totalSolvedSolo: number;
+  totalSolvedCoop: number;
   bySize: SizeStats[];
   byDay: DayOfWeekStats[];
+  bySizeSolo: SizeStats[];
+  bySizeCoop: SizeStats[];
+  byDaySolo: DayOfWeekStats[];
+  byDayCoop: DayOfWeekStats[];
   history: UserSolveHistoryItem[];
 }> {
   // Run size+day stats query and history query in parallel.
   // Both use lightweight JSONB extraction (no full content fetch).
   const [combinedStatsResult, historyResult] = await Promise.all([
-    // Combined size + day stats in a single CTE to avoid scanning puzzle_solves twice
+    // Combined size + day stats split by solve mode (solo/coop/all) in a single scan.
+    // mode_solves: best time per puzzle per mode; all_solves: best time per puzzle overall.
     pool.query(
-      `WITH best_solves AS (
-        SELECT DISTINCT ON (ps.pid)
+      `WITH mode_solves AS (
+        SELECT DISTINCT ON (ps.pid, CASE WHEN COALESCE(ps.player_count, 1) = 1 THEN 'solo' ELSE 'coop' END)
           ps.pid,
           ps.time_taken_to_solve AS best_time,
+          CASE WHEN COALESCE(ps.player_count, 1) = 1 THEN 'solo' ELSE 'coop' END AS solve_mode,
           GREATEST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
             || 'x' ||
           LEAST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
@@ -61,26 +72,33 @@ export async function getUserSolveStats(userId: string): Promise<{
         FROM puzzle_solves ps
         JOIN puzzles p ON ps.pid = p.pid
         WHERE ps.user_id = $1
-        ORDER BY ps.pid, ps.time_taken_to_solve ASC
+        ORDER BY ps.pid, CASE WHEN COALESCE(ps.player_count, 1) = 1 THEN 'solo' ELSE 'coop' END, ps.time_taken_to_solve ASC
       ),
-      size_stats AS (
-        SELECT size, COUNT(*)::int AS count, ROUND(AVG(best_time))::int AS avg_time
-        FROM best_solves GROUP BY size ORDER BY count DESC
-      ),
-      day_stats AS (
-        SELECT dow, COUNT(*)::int AS count, ROUND(AVG(best_time))::int AS avg_time
-        FROM best_solves WHERE dow IS NOT NULL GROUP BY dow
+      all_solves AS (
+        SELECT DISTINCT ON (pid) pid, best_time, size, dow
+        FROM mode_solves ORDER BY pid, best_time ASC
       )
-      SELECT 'size' AS stat_type, size AS key, count, avg_time FROM size_stats
+      SELECT 'size' AS stat_type, solve_mode, size AS key, COUNT(*)::int AS count, ROUND(AVG(best_time))::int AS avg_time
+      FROM mode_solves GROUP BY solve_mode, size
       UNION ALL
-      SELECT 'day' AS stat_type, dow AS key, count, avg_time FROM day_stats`,
+      SELECT 'size', 'all', size, COUNT(*)::int, ROUND(AVG(best_time))::int
+      FROM all_solves GROUP BY size
+      UNION ALL
+      SELECT 'day', solve_mode, dow, COUNT(*)::int, ROUND(AVG(best_time))::int
+      FROM mode_solves WHERE dow IS NOT NULL GROUP BY solve_mode, dow
+      UNION ALL
+      SELECT 'day', 'all', dow, COUNT(*)::int, ROUND(AVG(best_time))::int
+      FROM all_solves WHERE dow IS NOT NULL GROUP BY dow`,
       [userId]
     ),
     // Recent solve history — only extract needed JSONB fields
     pool.query(
       `SELECT
          ps.pid, ps.gid, ps.time_taken_to_solve, ps.solved_time, ps.player_count,
-         p.content->'info'->>'title' AS title,
+         COALESCE(p.content->'info'->>'titleOverride', p.content->'info'->>'title') AS title,
+         CASE WHEN p.content->'info'->>'titleOverride' IS NOT NULL THEN p.content->'info'->>'title' END AS original_title,
+         COALESCE(p.content->'info'->>'authorOverride', p.content->'info'->>'author') AS author,
+         CASE WHEN p.content->'info'->>'authorOverride' IS NOT NULL THEN p.content->'info'->>'author' END AS original_author,
          GREATEST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
            || 'x' ||
          LEAST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
@@ -95,17 +113,24 @@ export async function getUserSolveStats(userId: string): Promise<{
     ),
   ]);
 
-  // Parse combined stats result
-  const bySize: SizeStats[] = [];
-  const byDay: DayOfWeekStats[] = [];
-  let totalSolved = 0;
+  // Parse combined stats result into per-mode buckets
+  const statsByMode: Record<string, {bySize: SizeStats[]; byDay: DayOfWeekStats[]; total: number}> = {
+    all: {bySize: [], byDay: [], total: 0},
+    solo: {bySize: [], byDay: [], total: 0},
+    coop: {bySize: [], byDay: [], total: 0},
+  };
   for (const r of combinedStatsResult.rows) {
+    const bucket = statsByMode[r.solve_mode] || statsByMode.all;
     if (r.stat_type === 'size') {
-      bySize.push({size: r.key, count: r.count, avgTime: r.avg_time});
-      totalSolved += r.count;
+      bucket.bySize.push({size: r.key, count: r.count, avgTime: r.avg_time});
+      bucket.total += r.count;
     } else {
-      byDay.push({day: r.key, count: r.count, avgTime: r.avg_time});
+      bucket.byDay.push({day: r.key, count: r.count, avgTime: r.avg_time});
     }
+  }
+  // Sort bySize by count descending for each mode
+  for (const mode of Object.values(statsByMode)) {
+    mode.bySize.sort((a, b) => b.count - a.count);
   }
 
   // For collaborative solves, batch co-solver + count into a single query
@@ -141,6 +166,9 @@ export async function getUserSolveStats(userId: string): Promise<{
       pid: r.pid,
       gid: r.gid,
       title: r.title || 'Untitled',
+      originalTitle: r.original_title || undefined,
+      author: r.author || undefined,
+      originalAuthor: r.original_author || undefined,
       size: r.size,
       dow: r.dow || null,
       time: Number(r.time_taken_to_solve),
@@ -151,13 +179,27 @@ export async function getUserSolveStats(userId: string): Promise<{
     };
   });
 
-  return {totalSolved, bySize, byDay, history};
+  return {
+    totalSolved: statsByMode.all.total,
+    totalSolvedSolo: statsByMode.solo.total,
+    totalSolvedCoop: statsByMode.coop.total,
+    bySize: statsByMode.all.bySize,
+    byDay: statsByMode.all.byDay,
+    bySizeSolo: statsByMode.solo.bySize,
+    bySizeCoop: statsByMode.coop.bySize,
+    byDaySolo: statsByMode.solo.byDay,
+    byDayCoop: statsByMode.coop.byDay,
+    history,
+  };
 }
 
 export type InProgressGameItem = {
   gid: string;
   pid: string;
   title: string;
+  originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   lastActivity: string;
   percentComplete: number;
@@ -208,7 +250,10 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
        SELECT
          ug.gid,
          COALESCE(ce.event_payload->'params'->>'pid', fh.pid::text) AS pid,
-         COALESCE(p.content->'info'->>'title', p2.content->'info'->>'title', 'Untitled') AS title,
+         COALESCE(p.content->'info'->>'titleOverride', p.content->'info'->>'title', p2.content->'info'->>'titleOverride', p2.content->'info'->>'title', 'Untitled') AS title,
+         CASE WHEN COALESCE(p.content->'info'->>'titleOverride', p2.content->'info'->>'titleOverride') IS NOT NULL THEN COALESCE(p.content->'info'->>'title', p2.content->'info'->>'title') END AS original_title,
+         COALESCE(p.content->'info'->>'authorOverride', p.content->'info'->>'author', p2.content->'info'->>'authorOverride', p2.content->'info'->>'author') AS author,
+         CASE WHEN COALESCE(p.content->'info'->>'authorOverride', p2.content->'info'->>'authorOverride') IS NOT NULL THEN COALESCE(p.content->'info'->>'author', p2.content->'info'->>'author') END AS original_author,
          COALESCE(
            GREATEST(jsonb_array_length(p.content->'grid'), jsonb_array_length(p.content->'grid'->0))::text
              || 'x' ||
@@ -232,6 +277,9 @@ export async function getInProgressGames(userId: string): Promise<InProgressGame
       gid: r.gid,
       pid: r.pid,
       title: r.title || 'Untitled',
+      originalTitle: r.original_title || undefined,
+      author: r.author || undefined,
+      originalAuthor: r.original_author || undefined,
       size: r.size,
       lastActivity: r.last_activity ? r.last_activity.toISOString() : '',
       percentComplete: 0,
@@ -280,7 +328,7 @@ export async function getPuzzleSolves(gids: string[]): Promise<SolvedPuzzleType[
     pool.query(
       `SELECT
         ps.pid, ps.gid, ps.solved_time, ps.time_taken_to_solve,
-        p.content->'info'->>'title' AS title,
+        COALESCE(p.content->'info'->>'titleOverride', p.content->'info'->>'title') AS title,
         jsonb_array_length(p.content->'grid') AS grid_rows,
         jsonb_array_length(p.content->'grid'->0) AS grid_cols
       FROM puzzle_solves ps

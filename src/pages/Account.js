@@ -7,6 +7,7 @@ import {useLocation, useNavigate, Link} from 'react-router';
 import Nav from '../components/common/Nav';
 import Footer from '../components/common/Footer';
 import AuthContext from '../lib/AuthContext';
+import GlobalContext from '../lib/GlobalContext';
 import LoginModal from '../components/Auth/LoginModal';
 import {
   changeDisplayName,
@@ -83,6 +84,43 @@ function DisplayNameSection({user, accessToken, onSaved}) {
         </button>
         <button className="btn btn--small btn--contained btn--primary" onClick={handleSave} disabled={saving}>
           Save
+        </button>
+      </div>
+    </AccountSection>
+  );
+}
+
+const DARK_MODE_LABELS = {0: 'Off', 1: 'On', 2: 'System'};
+
+function GamePreferencesSection({preferences, savePreference, darkModePreference, toggleDarkMode}) {
+  const prefs = [
+    {key: 'vimMode', label: 'Vim mode', value: preferences?.vimMode ?? false},
+    {key: 'skipFilledSquares', label: 'Skip filled squares', value: preferences?.skipFilledSquares ?? true},
+    {key: 'autoAdvanceCursor', label: 'Auto-advance cursor', value: preferences?.autoAdvanceCursor ?? true},
+    {key: 'showProgress', label: 'Show progress', value: preferences?.showProgress ?? true},
+    {key: 'colorAttribution', label: 'Color Attribution', value: preferences?.colorAttribution ?? false},
+  ];
+
+  return (
+    <AccountSection title="Game Preferences">
+      {prefs.map(({key, label, value}) => (
+        <div key={key} className="account-pref-row">
+          <span>{label}</span>
+          <button
+            className={`btn btn--small btn--toggle ${value ? 'btn--contained btn--primary' : 'btn--outlined'}`}
+            onClick={() => savePreference(key, !value)}
+          >
+            {value ? 'On' : 'Off'}
+          </button>
+        </div>
+      ))}
+      <div className="account-pref-row">
+        <span>Dark mode</span>
+        <button
+          className={`btn btn--small btn--toggle ${darkModePreference !== '0' ? 'btn--contained btn--primary' : 'btn--outlined'}`}
+          onClick={toggleDarkMode}
+        >
+          {DARK_MODE_LABELS[darkModePreference] || 'Off'}
         </button>
       </div>
     </AccountSection>
@@ -473,7 +511,9 @@ function DeleteAccountSection({user, accessToken, onDeleted}) {
 }
 
 export default function Account() {
-  const {isAuthenticated, user, accessToken, refreshUser, handleLogout} = useContext(AuthContext);
+  const {isAuthenticated, user, accessToken, refreshUser, handleLogout, preferences, savePreference} =
+    useContext(AuthContext);
+  const {toggleMolesterMoons, darkModePreference} = useContext(GlobalContext);
   const [showLogin, setShowLogin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -524,6 +564,12 @@ export default function Account() {
           <>
             <DisplayNameSection user={user} accessToken={accessToken} onSaved={refreshUser} />
             <ProfileVisibilitySection user={user} accessToken={accessToken} onSaved={refreshUser} />
+            <GamePreferencesSection
+              preferences={preferences}
+              savePreference={savePreference}
+              darkModePreference={darkModePreference}
+              toggleDarkMode={toggleMolesterMoons}
+            />
             <EmailSection user={user} accessToken={accessToken} />
             <PasswordSection user={user} accessToken={accessToken} onSaved={refreshUser} />
             <GoogleSection user={user} accessToken={accessToken} onSaved={refreshUser} />

@@ -239,6 +239,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const newVimMode = !prevState.vimMode;
       localStorage.setItem(vimModeKey, JSON.stringify(newVimMode));
+      this.props.onPreferenceChange?.('vimMode', newVimMode);
       return {vimMode: newVimMode};
     });
   };
@@ -266,7 +267,8 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const skipFilledSquares = !prevState.skipFilledSquares;
       localStorage.setItem(skipFilledSquaresKey, JSON.stringify(skipFilledSquares));
-      return {skipFilledSquares: skipFilledSquares};
+      this.props.onPreferenceChange?.('skipFilledSquares', skipFilledSquares);
+      return {skipFilledSquares};
     });
   };
 
@@ -274,6 +276,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const autoAdvanceCursor = !prevState.autoAdvanceCursor;
       localStorage.setItem(autoAdvanceCursorKey, JSON.stringify(autoAdvanceCursor));
+      this.props.onPreferenceChange?.('autoAdvanceCursor', autoAdvanceCursor);
       return {autoAdvanceCursor};
     });
   };
@@ -282,6 +285,7 @@ export default class Game extends Component {
     this.setState((prevState) => {
       const showProgress = !prevState.showProgress;
       localStorage.setItem(showProgressKey, JSON.stringify(showProgress));
+      this.props.onPreferenceChange?.('showProgress', showProgress);
       return {showProgress};
     });
   };
@@ -405,7 +409,10 @@ export default class Game extends Component {
       // Reserved space: nav (~41px) + toolbar (~30px) + clue bar (~44px) + padding (~24px) + margin (~46px)
       const DESKTOP_CHROME_HEIGHT = 185;
       const availableHeight = window.innerHeight - DESKTOP_CHROME_HEIGHT;
-      width = Math.min((availableHeight * cols) / rows, screenWidth - 20);
+      const viewportWidth = (availableHeight * cols) / rows;
+      // Cap at the old fixed sizing so zooming out shrinks the grid as expected
+      const fixedWidth = (35 * 15 * cols) / rows;
+      width = Math.min(viewportWidth, fixedWidth, screenWidth - 20);
     }
     const minSize = this.props.mobile ? 1 : 20;
     const size = Math.max(minSize, width / cols);
@@ -521,7 +528,11 @@ export default class Game extends Component {
         onToggleExpandMenu={this.handleToggleExpandMenu}
         colorAttributionMode={this.state.colorAttributionMode}
         onToggleColorAttributionMode={() => {
-          this.setState((prevState) => ({colorAttributionMode: !prevState.colorAttributionMode}));
+          this.setState((prevState) => {
+            const colorAttributionMode = !prevState.colorAttributionMode;
+            this.props.onPreferenceChange?.('colorAttribution', colorAttributionMode);
+            return {colorAttributionMode};
+          });
         }}
         onRefocus={this.handleRefocus}
         unreads={this.props.unreads}

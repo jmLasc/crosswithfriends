@@ -9,6 +9,9 @@ export interface SolveHistoryItem {
   pid: string;
   gid: string;
   title: string;
+  originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   dow: string | null;
   time: number;
@@ -33,6 +36,9 @@ export interface DayOfWeekStats {
 export interface UploadedPuzzle {
   pid: string;
   title: string;
+  originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   uploadedAt: string;
   timesSolved: number;
   size: string;
@@ -43,6 +49,9 @@ export interface InProgressGame {
   gid: string;
   pid: string;
   title: string;
+  originalTitle?: string;
+  author?: string;
+  originalAuthor?: string;
   size: string;
   lastActivity: string;
   percentComplete: number;
@@ -56,12 +65,19 @@ export interface UserStatsResponse {
   isPrivate?: boolean;
   stats?: {
     totalSolved: number;
+    totalSolvedSolo: number;
+    totalSolvedCoop: number;
     bySize: SizeStats[];
     byDay: DayOfWeekStats[];
+    bySizeSolo: SizeStats[];
+    bySizeCoop: SizeStats[];
+    byDaySolo: DayOfWeekStats[];
+    byDayCoop: DayOfWeekStats[];
   };
   history?: SolveHistoryItem[];
   uploads?: UploadedPuzzle[];
   inProgress?: InProgressGame[];
+  snapshotStatuses?: {[pid: string]: 'solved' | 'started'};
 }
 
 export async function getUserStats(

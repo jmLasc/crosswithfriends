@@ -55,7 +55,12 @@ jobs:
       - name: Seed load test data
         env:
           DATABASE_URL: ${{ secrets.TESTING_DB_URL }}
-        run: psql "$DATABASE_URL" -f loadtest/seed.sql
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Skipping — TESTING_DB_URL secret not configured (fork?)"
+            exit 0
+          fi
+          psql "$DATABASE_URL" -f loadtest/seed.sql
 
   playwright:
     name: Playwright E2E

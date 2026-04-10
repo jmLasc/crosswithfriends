@@ -520,8 +520,12 @@ export default class GridControls extends Component {
           name="grid"
           ref={this.inputRef}
           style={inputStyle}
-          autoComplete="none"
+          autoComplete="off"
           autoCapitalize="none"
+          data-1p-ignore
+          data-lpignore="true"
+          data-bw-ignore="true"
+          data-form-type="other"
         />
       </div>
     );

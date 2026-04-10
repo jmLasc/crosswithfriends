@@ -151,7 +151,7 @@ export async function listPuzzles(
     const parameterizedTitleAuthorFilter = parametersForTitleAuthorFilter
       .map(
         (_s, idx) =>
-          `AND ((content -> 'info' ->> 'title') || ' ' || (content->'info'->>'author')) ILIKE $${
+          `AND (COALESCE(content->'info'->>'titleOverride', content->'info'->>'title') || ' ' || COALESCE(content->'info'->>'authorOverride', content->'info'->>'author')) ILIKE $${
             idx + parameterOffset
           }`
       )
@@ -235,6 +235,8 @@ const puzzleValidator = Joi.object({
     author: string(),
     copyright: string().optional(),
     description: string().optional(),
+    titleOverride: string().optional(),
+    authorOverride: string().optional(),
   }),
   circles: Joi.array().optional(),
   shades: Joi.array().optional(),
@@ -303,7 +305,11 @@ export async function addPuzzle(
 
 export async function getUserUploadedPuzzles(userId: string) {
   const {rows} = await pool.query(
-    `SELECT pid, content->'info'->>'title' as title,
+    `SELECT pid,
+            COALESCE(content->'info'->>'titleOverride', content->'info'->>'title') as title,
+            CASE WHEN content->'info'->>'titleOverride' IS NOT NULL THEN content->'info'->>'title' END as original_title,
+            COALESCE(content->'info'->>'authorOverride', content->'info'->>'author') as author,
+            CASE WHEN content->'info'->>'authorOverride' IS NOT NULL THEN content->'info'->>'author' END as original_author,
             uploaded_at, times_solved, is_public,
             jsonb_array_length(content->'grid') as rows,
             jsonb_array_length(content->'grid'->0) as cols
@@ -316,6 +322,9 @@ export async function getUserUploadedPuzzles(userId: string) {
   return rows.map((r: any) => ({
     pid: r.pid,
     title: r.title || 'Untitled',
+    originalTitle: r.original_title || undefined,
+    author: r.author || undefined,
+    originalAuthor: r.original_author || undefined,
     uploadedAt: r.uploaded_at,
     timesSolved: Number(r.times_solved),
     size: `${r.rows}x${r.cols}`,
@@ -326,7 +335,7 @@ export async function getUserUploadedPuzzles(userId: string) {
 async function isGidAlreadySolved(gid: string) {
   const {
     rows: [{count}],
-  } = await pool.query(`SELECT COUNT(*) FROM puzzle_solves WHERE gid=$1`, [gid]);
+  } = await pool.query(`SELECT COUNT(*) FROM puzzle_solves WHERE gid=$1 AND user_id IS NULL`, [gid]);
   return count > 0;
 }
 
