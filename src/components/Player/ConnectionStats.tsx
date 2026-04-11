@@ -18,15 +18,15 @@ const ConnectionStats: React.FC<{optimisticCounter?: number}> = ({optimisticCoun
     };
   }, []);
 
+  let text: string;
   if (connectionStatus?.connected) {
     const syncLabel = optimisticCounter ? `${optimisticCounter} ahead` : 'Synced';
-    return (
-      <div>
-        {syncLabel} ({connectionStatus.latency}ms)
-      </div>
-    );
+    text = `${syncLabel} (${connectionStatus.latency}ms)`;
+  } else {
+    text = 'Not connected';
   }
-  return <div>Not connected</div>;
+
+  return <div className="player--connection-stats">{text}</div>;
 };
 
 export default ConnectionStats;

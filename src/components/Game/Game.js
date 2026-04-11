@@ -370,13 +370,13 @@ export default class Game extends Component {
       gridStyle: {
         cellStyle: {
           selected: {
-            backgroundColor: myColor,
+            '--cell-bg': myColor,
           },
           highlighted: {
-            backgroundColor: toHex(darken(themeColor)),
+            '--cell-bg': toHex(darken(themeColor)),
           },
           frozen: {
-            backgroundColor: toHex(GREENISH),
+            '--cell-bg': toHex(GREENISH),
           },
         },
       },

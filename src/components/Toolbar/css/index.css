@@ -16,6 +16,12 @@ code {
   text-align: center;
 }
 
+@media print {
+  .toolbar {
+    display: none;
+  }
+}
+
 .toolbar button {
   color: var(--main-gray-1);
   padding: 7px 10px;
