@@ -11,6 +11,12 @@
   flex-direction: column;
 }
 
+@media print {
+  .chat {
+    display: none;
+  }
+}
+
 .chat.mobile {
   padding: 0;
 }
