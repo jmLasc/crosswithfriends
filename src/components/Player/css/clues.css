@@ -32,17 +32,21 @@
   position: relative;
   flex-basis: 570px;
   flex-grow: 1;
-  overflow-y: auto;
   border-top: 1px solid #e2e2e2;
   margin-top: 5px;
   padding-right: 10px;
 }
 
+@media screen {
+  .clues--list--scroll {
+    overflow-y: auto;
+  }
+}
+
 .clues--list--scroll--clue {
   display: flex;
   flex-direction: row;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-block: 0.1em;
   border-left: 5px solid transparent;
   cursor: pointer;
 }
@@ -51,17 +55,23 @@
   color: #888;
 }
 
-.clues--list--scroll--clue.selected {
-  background-color: var(--main-blue-3);
-}
+@media screen {
+  .clues--list--scroll--clue {
+    padding-block: 0.3125em;
+  }
 
-.clues--list--scroll--clue.half-selected {
-  border-left: 5px solid var(--main-blue-3);
+  .clues--list--scroll--clue.selected {
+    background-color: var(--main-blue-3);
+  }
+
+  .clues--list--scroll--clue.half-selected {
+    border-left: 5px solid var(--main-blue-3);
+  }
 }
 
 .clues--list--scroll--clue--number {
   margin-left: 5px;
-  line-height: 19px;
+  line-height: 1.2em;
   font-weight: bold;
 }
 

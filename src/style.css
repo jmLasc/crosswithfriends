@@ -14,6 +14,7 @@ input,
   min-height: 0;
   margin: 0;
   font-family: 'avenir next', avenir, Nunito, 'helvetica neue', Helvetica, arial, sans-serif;
+  print-color-adjust: exact;
 }
 
 button {

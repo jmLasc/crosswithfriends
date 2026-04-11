@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary, class-methods-use-this, consistent-return, react/jsx-no-bind */
+import './css/game.css';
+
 import * as Sentry from '@sentry/react';
 import {Component} from 'react';
 import _ from 'lodash';
@@ -447,7 +449,7 @@ class Game extends Component {
     const desktopContent = (
       <>
         <Nav />
-        <div className="flex flex--grow" style={{overflow: 'auto'}}>
+        <div className="game">
           <div className={`flex--column flex--shrink-0${chatHidden ? ' flex--center-h' : ''}`}>
             {this.showingGame && this.renderGame()}
           </div>

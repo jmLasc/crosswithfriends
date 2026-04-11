@@ -7,6 +7,12 @@
   background-color: var(--main-blue);
 }
 
+@media print {
+  .nav {
+    display: none;
+  }
+}
+
 .nav.mobile {
   padding-top: 10px;
   padding-bottom: 10px;

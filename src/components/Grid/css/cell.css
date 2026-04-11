@@ -10,8 +10,17 @@
   display: flex;
   flex-direction: column;
   user-select: none;
-  background-color: white;
+
+  --cell-bg: white;
+
+  background-color: var(--cell-bg);
   box-sizing: border-box;
+}
+
+@media print {
+  .cell {
+    background-color: white;
+  }
 }
 
 .cell--wrapper {
@@ -30,7 +39,9 @@
 
 .cell.hidden {
   pointer-events: none;
-  background-color: var(--main-gray-2);
+
+  --cell-bg: var(--main-gray-2);
+
   color: var(--main-gray-2);
 }
 
@@ -41,27 +52,27 @@
 }
 
 .frozen .cell.highlighted {
-  background-color: var(--main-green-1);
+  --cell-bg: var(--main-green-1);
 }
 
 div:focus .frozen .cell.highlighted {
-  background-color: var(--main-green-2);
+  --cell-bg: var(--main-green-2);
 }
 
 .cell.highlighted {
-  background-color: var(--main-blue-3);
+  --cell-bg: var(--main-blue-3);
 }
 
 div:focus .cell.highlighted {
-  background-color: var(--main-blue-2);
+  --cell-bg: var(--main-blue-2);
 }
 
 .cell.referenced {
-  background-color: #b3ff00;
+  --cell-bg: #b3ff00;
 }
 
 div:focus .cell.referenced {
-  background-color: #b3ff00; /* TODO */
+  --cell-bg: #b3ff00; /* TODO */
 }
 
 .cell.referenced.highlighted {
@@ -69,9 +80,9 @@ div:focus .cell.referenced {
 }
 
 .cell.selected {
-  background-color: #4aeba1;
+  --cell-bg: #4aeba1;
 
-  /* background-color: #98ee99; */
+  /* --cell-bg: #98ee99; */
 }
 
 .cell.pencil .cell--value {

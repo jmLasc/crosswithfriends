@@ -7,6 +7,12 @@ import {Ping, CellStyles} from './types';
 import './css/cell.css';
 import {CellData, Cursor} from '../../shared/types';
 
+declare module 'react' {
+  interface CSSProperties {
+    '--cell-bg'?: string;
+  }
+}
+
 export interface EnhancedCellData extends CellData {
   r: number;
   c: number;
@@ -188,7 +194,7 @@ export default class Cell extends React.Component<Props> {
     } else if (highlighted) {
       style = frozen ? cellStyle.frozen : cellStyle.highlighted;
     } else {
-      style = {backgroundColor: attributionColor};
+      style = {'--cell-bg': attributionColor};
     }
     if (image) {
       style = {

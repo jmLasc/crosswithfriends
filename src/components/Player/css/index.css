@@ -23,6 +23,12 @@
   align-items: stretch;
 }
 
+@media print {
+  .player--main--clue-bar {
+    display: none;
+  }
+}
+
 .player--main--clue-bar--number {
   font-weight: bold;
   display: inline-block;
@@ -65,6 +71,12 @@
 
 .player--main--clues {
   display: flex;
+}
+
+@media print {
+  .player--main--clues {
+    font-size: 0.6em;
+  }
 }
 
 .player--main--vim-bar {
@@ -145,4 +157,10 @@
   display: inline-block;
   overflow-y: auto;
   max-height: 100%;
+}
+
+@media print {
+  .player--connection-stats {
+    display: none;
+  }
 }
