@@ -3,6 +3,18 @@ import type {JSX} from 'react';
 
 type Tree = {name?: string; children: Tree[]} | {name: 'text'; value: string};
 
+// Convert Markdown-style emphasis markers to <strong> so the existing HTML
+// parser can render them. Both `**text**` and `*text*` become bold — this
+// matches NYT-style clue rendering (e.g. "Put all the b*o*l*d* letters"
+// highlighting o, d, o, r in bold) rather than CommonMark, where `*` would
+// be italic. The character adjacent to each marker must be non-whitespace,
+// mirroring CommonMark's flanking rule so stray asterisks (e.g. "5 * 6")
+// aren't treated as emphasis.
+const applyMarkdown = (text: string): string =>
+  text
+    .replace(/\*\*([^*\s](?:[^*]*?[^*\s])?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*\s](?:[^*]*?[^*\s])?)\*/g, '<strong>$1</strong>');
+
 // parse HTML by creating a template element and walking its tree
 // keep only elements and their contents (i.e. no attributes)
 const simpleParse = (clue: string): Tree => {
@@ -64,11 +76,15 @@ export default function ClueText({text = ''}): JSX.Element {
     return createElement('i', {}, text.slice(1, -1));
   }
 
+  // expand Markdown emphasis (**bold**, *italic*) into HTML so the rest of
+  // this component can treat it uniformly with HTML clues
+  const processed = text.includes('*') ? applyMarkdown(text) : text;
+
   // fast path for text with no HTML and no entities
-  if (!text.match(/[<>]|&[^;]+;/)) return createElement('span', {}, text);
+  if (!processed.match(/[<>]|&[^;]+;/)) return createElement('span', {}, processed);
 
   // otherwise, parse HTML and render allowed elements
   const allowed = ['em', 'strong', 'u', 'i', 'b', 'sup', 'sub'];
-  const tree = simpleParse(text);
+  const tree = simpleParse(processed);
   return createElement('span', {}, simpleRender(tree, allowed));
 }
