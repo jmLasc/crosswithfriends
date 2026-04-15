@@ -3,16 +3,17 @@ import type {JSX} from 'react';
 
 type Tree = {name?: string; children: Tree[]} | {name: 'text'; value: string};
 
-// Convert Markdown emphasis markers to HTML so the existing HTML parser
-// can render them. `**text**` becomes <strong>, `*text*` becomes <em>.
-// Bold is processed first so that `**…**` wins over `*…*`. The character
-// adjacent to each marker must be non-whitespace, matching CommonMark
-// emphasis rules — this prevents stray asterisks (e.g. "5 * 6 = 30") from
-// being treated as emphasis.
+// Convert Markdown-style emphasis markers to <strong> so the existing HTML
+// parser can render them. Both `**text**` and `*text*` become bold — this
+// matches NYT-style clue rendering (e.g. "Put all the b*o*l*d* letters"
+// highlighting o, d, o, r in bold) rather than CommonMark, where `*` would
+// be italic. The character adjacent to each marker must be non-whitespace,
+// mirroring CommonMark's flanking rule so stray asterisks (e.g. "5 * 6")
+// aren't treated as emphasis.
 const applyMarkdown = (text: string): string =>
   text
     .replace(/\*\*([^*\s](?:[^*]*?[^*\s])?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*([^*\s](?:[^*]*?[^*\s])?)\*/g, '<em>$1</em>');
+    .replace(/\*([^*\s](?:[^*]*?[^*\s])?)\*/g, '<strong>$1</strong>');
 
 // parse HTML by creating a template element and walking its tree
 // keep only elements and their contents (i.e. no attributes)

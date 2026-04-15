@@ -20,17 +20,17 @@ describe('ClueText', () => {
     expect(render('""quoted clue""')).toBe('<i>&quot;quoted clue&quot;</i>');
   });
 
-  it('renders **text** as bold via Markdown', () => {
+  it('renders **text** as bold', () => {
     expect(render('A **bold** move')).toBe('<span>A <strong>bold</strong> move</span>');
   });
 
-  it('renders *text* as italic via Markdown', () => {
-    expect(render('An *emphatic* clue')).toBe('<span>An <em>emphatic</em> clue</span>');
+  it('renders *text* as bold (NYT convention)', () => {
+    expect(render('An *emphatic* clue')).toBe('<span>An <strong>emphatic</strong> clue</span>');
   });
 
   it('renders multiple Markdown spans within a single clue', () => {
     expect(render('Put all the b*o*l*d* letters in this clue t*o*gethe*r*?')).toBe(
-      '<span>Put all the b<em>o</em>l<em>d</em> letters in this clue t<em>o</em>gethe<em>r</em>?</span>'
+      '<span>Put all the b<strong>o</strong>l<strong>d</strong> letters in this clue t<strong>o</strong>gethe<strong>r</strong>?</span>'
     );
   });
 
@@ -42,7 +42,7 @@ describe('ClueText', () => {
     expect(render('* not emphasis *')).toBe('<span>* not emphasis *</span>');
   });
 
-  it('prefers ** over * when both are present', () => {
-    expect(render('**very** *neat*')).toBe('<span><strong>very</strong> <em>neat</em></span>');
+  it('renders both ** and * as bold when mixed', () => {
+    expect(render('**very** *neat*')).toBe('<span><strong>very</strong> <strong>neat</strong></span>');
   });
 });
