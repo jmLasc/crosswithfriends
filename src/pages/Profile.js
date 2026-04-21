@@ -207,12 +207,12 @@ function StatsCards({stats}) {
 
 function HistoryTable({history}) {
   const {page, pageItems, totalPages, pageSize, setPageSize, handlePrev, handleNext} = usePagination(
-    history,
+    history || [],
     'profile.pageSize.history',
     10
   );
 
-  if (history.length === 0) return null;
+  if (!history || history.length === 0) return null;
 
   return (
     <div className="profile--history">
