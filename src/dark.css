@@ -81,12 +81,8 @@
 .dark .cell.pencil .cell--value {
   color: var(--pencil-color);
 
-  /* Outline halo keeps pencil letters legible against colored selection/highlight backgrounds. */
-  text-shadow:
-    -1px -1px 0 rgb(0 0 0 / 70%),
-    1px -1px 0 rgb(0 0 0 / 70%),
-    -1px 1px 0 rgb(0 0 0 / 70%),
-    1px 1px 0 rgb(0 0 0 / 70%);
+  /* Soft halo keeps pencil letters legible against colored selection/highlight backgrounds. */
+  text-shadow: 0 0 2px rgb(0 0 0 / 70%);
 }
 
 .dark .cell--shade {
