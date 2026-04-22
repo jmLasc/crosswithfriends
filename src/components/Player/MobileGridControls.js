@@ -35,6 +35,11 @@ export default class MobileGridControls extends GridControls {
     this.lastTouchMove = Date.now();
     this.boundCenterGridX = () => this.centerGridX();
     this._touchStartTransform = null;
+    this._fitOnScreenTimer = null;
+    // Set on the tap path before onSetSelected, consumed by the next
+    // componentDidUpdate so a tap-triggered selection change doesn't pan
+    // (the user saw the cell in order to tap it).
+    this._lastSelectionFromTap = false;
   }
 
   componentDidMount() {
@@ -51,6 +56,7 @@ export default class MobileGridControls extends GridControls {
   }
 
   componentWillUnmount() {
+    clearTimeout(this._fitOnScreenTimer);
     if (window.visualViewport && this._handleViewportResize) {
       window.visualViewport.removeEventListener('resize', this._handleViewportResize);
     }
@@ -59,8 +65,7 @@ export default class MobileGridControls extends GridControls {
   componentDidUpdate(prevProps, prevState) {
     // After a touch gesture ends (all fingers lifted), enforce grid boundaries —
     // but ONLY if the gesture actually moved/zoomed the grid. A simple cell tap
-    // doesn't change the transform, so we skip fitOnScreen entirely and let the
-    // user pan manually if they want the selected cell centered.
+    // doesn't change the transform, so we skip this branch for taps.
     if (prevState.anchors.length > 0 && this.state.anchors.length === 0) {
       const st = this._touchStartTransform;
       const ct = this.state.transform;
@@ -71,14 +76,25 @@ export default class MobileGridControls extends GridControls {
         this.fitOnScreen();
       }
     }
+    // Keep the selected cell in view for non-tap selection changes (typing
+    // advances, tab/arrow nav). Taps are handled by handleTouchEnd setting
+    // _lastSelectionFromTap so this path is a no-op for them.
+    if (prevProps.selected.r !== this.props.selected.r || prevProps.selected.c !== this.props.selected.c) {
+      if (this._lastSelectionFromTap) {
+        this._lastSelectionFromTap = false;
+      } else {
+        clearTimeout(this._fitOnScreenTimer);
+        this._fitOnScreenTimer = setTimeout(() => this.fitOnScreen(true), 200);
+      }
+    }
   }
 
-  fitOnScreen() {
-    if (this.state.lastFitOnScreen > Date.now() - 100) return;
+  fitOnScreen(fitCurrentClue) {
+    if (!fitCurrentClue && this.state.lastFitOnScreen > Date.now() - 100) return;
 
     const rect = this.zoomContainer.current.getBoundingClientRect();
     let {scale, translateX, translateY} = this.state.transform;
-    const {size} = this.props;
+    const {selected, size} = this.props;
 
     // default scale already fits screen width; no need to zoom out further
     scale = Math.max(1, scale);
@@ -98,7 +114,39 @@ export default class MobileGridControls extends GridControls {
     const gridHeight = this.grid.rows * size * scale;
     const minY = Math.min(0, usableHeight - gridHeight - PADDING);
     const maxY = PADDING;
-    translateY = Math.min(Math.max(translateY, minY), maxY);
+    // General Y clamp only applies to pinch/pan-end and keyboard resize.
+    // For selection changes, the fitCurrentClue block below pans only when the
+    // cell is actually off-screen, avoiding fighting between the two clamps.
+    if (!fitCurrentClue) {
+      translateY = Math.min(Math.max(translateY, minY), maxY);
+    }
+
+    if (fitCurrentClue) {
+      const posX = selected.c * size;
+      const posY = selected.r * size;
+      const paddingX = (rect.width - this.grid.cols * size) / 2;
+      const paddingY = (rect.height - this.grid.rows * size) / 2;
+      const tX = (posX + paddingX) * scale;
+      const tY = (posY + paddingY) * scale;
+      const visibleHeight = usableHeight;
+
+      // Only adjust horizontal panning if the cell is actually off-screen.
+      const cellScreenX = tX + translateX;
+      const cellRight = cellScreenX + size * scale;
+      if (cellScreenX < 0 || cellRight > rect.width) {
+        translateX = _.clamp(translateX, -tX, rect.width - tX - size * scale);
+      }
+
+      // Only adjust vertical panning if the cell is significantly off-screen
+      // (above the viewport or behind the keyboard). The tolerance prevents
+      // small pans when cells are right at the boundary.
+      const TOLERANCE = size * scale; // one cell height of slack
+      const cellScreenY = tY + translateY;
+      const cellBottom = cellScreenY + size * scale;
+      if (cellScreenY < -TOLERANCE || cellBottom > visibleHeight + TOLERANCE) {
+        translateY = _.clamp(translateY, -tY, visibleHeight - tY - size * scale);
+      }
+    }
 
     // Skip setState if nothing actually changed — avoids unnecessary re-renders
     // and prevents cascading componentDidUpdate triggers.
@@ -211,6 +259,7 @@ export default class MobileGridControls extends GridControls {
         if (this.props.selected.r === r && this.props.selected.c === c) {
           this.props.onChangeDirection();
         } else {
+          this._lastSelectionFromTap = true;
           this.props.onSetSelected({r, c});
         }
       }
