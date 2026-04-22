@@ -103,11 +103,11 @@ export default function Help() {
             <strong>Sound on solve</strong> — toggles the jingle that plays when you complete a puzzle.
           </li>
           <li>
-            <strong>Skip filled</strong> — when typing, jump over cells that already have letters.
+            <strong>Skip filled squares</strong> — when typing, jump over cells that already have letters.
           </li>
           <li>
-            <strong>Auto-advance</strong> — when the current word is complete, move the cursor to the next
-            clue automatically.
+            <strong>Auto-advance cursor</strong> — when the current word is complete, move the cursor to the
+            next clue automatically.
           </li>
           <li>
             <strong>Show progress</strong> — show a percent-complete indicator and celebratory messages at
@@ -135,16 +135,16 @@ export default function Help() {
         <h3>What keyboard shortcuts are available?</h3>
         <p>
           Click the <code>ⓘ</code> icon in the game toolbar for a full list of shortcuts inside the game,
-          including Tab / Shift+Tab to jump between clues, Space to flip direction, Shift+Enter or
-          <code>[</code> / <code>]</code> to move perpendicular to the current word, and
-          <code>Alt</code>+<code>S</code>/<code>W</code>/<code>P</code> to Check Square/Word/Puzzle.
+          including <code>Tab</code> / <code>Shift+Tab</code> to jump between clues, <code>Space</code> to
+          flip direction, <code>Shift+Enter</code> or <code>[</code> / <code>]</code> to move perpendicular to
+          the current word, and <code>Alt+S/W/P</code> to Check <em>Square</em>/<em>Word</em>/<em>Puzzle</em>.
         </p>
 
         <h3>How do I switch to dark mode?</h3>
         <p>
-          Click the user icon in the top right and choose the Dark Mode option. It cycles between <em>Off</em>
-          , <em>On</em>, and <em>System</em> (follows your OS setting). If you&apos;re signed in, the
-          preference syncs across your devices.
+          Click the user icon in the top right corner and choose the Dark Mode option. It cycles between{' '}
+          <em>Off</em>, <em>On</em>, and <em>System</em> (follows your OS setting). If you&apos;re signed in,
+          the preference syncs across your devices.
         </p>
 
         <h3>Can I print a puzzle?</h3>
