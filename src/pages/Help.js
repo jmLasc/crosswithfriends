@@ -4,6 +4,7 @@ import {Helmet} from 'react-helmet-async';
 import {Link} from 'react-router';
 import Nav from '../components/common/Nav';
 import Footer from '../components/common/Footer';
+import SupportOptions from '../components/common/SupportOptions';
 
 export default function Help() {
   return (
@@ -226,6 +227,13 @@ export default function Help() {
           If you&apos;ve already verified but still see the verification screen, try refreshing the page or
           logging out and back in.
         </p>
+
+        <h2>Support the Site</h2>
+        <p>
+          Cross with Friends is free and ad-free. If you&apos;ve enjoyed it and want to help cover hosting
+          costs, either option below goes to the same place — pick whichever works in your region.
+        </p>
+        <SupportOptions showIntro={false} />
 
         <h2>Contact &amp; Community</h2>
 
