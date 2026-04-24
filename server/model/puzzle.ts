@@ -276,7 +276,7 @@ export async function addPuzzle(
   pid?: string,
   uploadedBy?: string | null
 ): Promise<AddPuzzleResult> {
-  const puzzleId = pid || crypto.randomUUID().substr(0, 8);
+  const puzzleId = pid || crypto.randomUUID().slice(0, 8);
   validatePuzzle(puzzle);
   const contentHash = computePuzzleHash(puzzle);
 
