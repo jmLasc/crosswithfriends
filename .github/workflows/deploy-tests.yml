@@ -114,6 +114,26 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update && sudo apt-get install -y k6
 
+      # /api/version returning the new SHA only proves the app booted —
+      # the DB connection pool, query plan caches, and the V8 hot path are
+      # still cold. Hit each endpoint k6 measures so the warmup tail isn't
+      # what trips the strict thresholds.
+      - name: Warm up endpoints
+        run: |
+          set +e
+          warm() {
+            for i in 1 2 3 4 5; do curl -sS -o /dev/null "$@" || true; done
+          }
+          # Read endpoints
+          warm "$BASE_URL/api/puzzle_list?page=0&pageSize=20&filter[sizeFilter][Standard]=true&filter[typeFilter][Standard]=true"
+          warm "$BASE_URL/api/puzzle/lt-std-1/info"
+          warm -X POST -H "Content-Type: application/json" -d '{"gids":["lt-game-1","lt-game-50","lt-game-100"]}' "$BASE_URL/api/game-progress"
+          # Auth path (401 still exercises JWT middleware)
+          warm "$BASE_URL/api/auth/me"
+          # Login path (rejected creds still warm bcrypt + DB lookup)
+          warm -X POST -H "Content-Type: application/json" -d '{"email":"warmup@example.invalid","password":"x"}' "$BASE_URL/api/auth/login"
+          echo "Warmup complete"
+
       - name: Run API read tests
         env:
           K6_PROFILE: smoke
