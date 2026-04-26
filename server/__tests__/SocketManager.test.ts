@@ -305,6 +305,31 @@ describe('SocketManager', () => {
       expect(pool.query).toHaveBeenCalledTimes(1);
     });
 
+    it('primes the gameExists cache after a successful create event', async () => {
+      const {io, socketHandlers} = createMockIo();
+      const sm = new SocketManager(io);
+      sm.listen();
+
+      // Create event passes through without a gameExists lookup
+      const ack1 = jest.fn();
+      await socketHandlers['game_event'](
+        {gid: 'g1', event: {type: 'create', timestamp: 1700000000000, params: {pid: 'p1'}}},
+        ack1
+      );
+      expect(ack1).toHaveBeenCalledWith();
+
+      // Subsequent updateCell on the same socket+gid should NOT call gameExists —
+      // the create should have primed verifiedGids. Only the INSERT runs.
+      pool.query.mockClear();
+      const ack2 = jest.fn();
+      await socketHandlers['game_event'](
+        {gid: 'g1', event: {type: 'updateCell', timestamp: 1700000000001, params: {id: 'p1'}}},
+        ack2
+      );
+      expect(ack2).toHaveBeenCalledWith();
+      expect(pool.query).toHaveBeenCalledTimes(1);
+    });
+
     it('allows ephemeral events to bypass the gate', async () => {
       const {io, socketHandlers} = createMockIo();
       const sm = new SocketManager(io);

@@ -135,6 +135,12 @@ class SocketManager {
             delete event.verifiedUserId;
           }
           await this.addGameEvent(message.gid, event);
+          // A successful create persists the bootstrap row, so future events
+          // from this socket can skip the gameExists lookup.
+          if (event.type === 'create') {
+            const verified: Set<string> = (socket.data.verifiedGids ||= new Set());
+            verified.add(message.gid);
+          }
           if (typeof ack === 'function') ack();
         } catch (err) {
           console.error(`[Socket] game_event error:`, err);
