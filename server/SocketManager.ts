@@ -3,7 +3,7 @@
 import {RoomEvent} from '@shared/roomEvents';
 import * as Sentry from '@sentry/node';
 import {Server} from 'socket.io';
-import {addGameEvent, GameEvent, getGameEvents} from './model/game';
+import {addGameEvent, gameExists, GameEvent, getGameEvents} from './model/game';
 import {addRoomEvent, getRoomEvents} from './model/room';
 import {verifyAccessToken} from './auth/jwt';
 
@@ -106,6 +106,23 @@ class SocketManager {
             if (typeof ack === 'function') ack({error: 'invalid gid'});
             return;
           }
+          // Reject persisted, non-create events for gids that don't have a
+          // create event or snapshot — prevents orphan rows from accumulating
+          // for legacy gids whose game was never bootstrapped server-side
+          // (#478). Ephemeral events (cursor, ping) bypass since they aren't
+          // persisted. Cache positive results per socket to avoid repeated
+          // DB lookups.
+          if (event.type !== 'create' && !EPHEMERAL_EVENT_TYPES.has(event.type)) {
+            const verified: Set<string> = (socket.data.verifiedGids ||= new Set());
+            if (!verified.has(message.gid)) {
+              if (await gameExists(message.gid)) {
+                verified.add(message.gid);
+              } else {
+                if (typeof ack === 'function') ack({error: 'unknown game'});
+                return;
+              }
+            }
+          }
           // Replace non-numeric timestamps with real server time
           if (typeof event.timestamp !== 'number') {
             event.timestamp = Date.now();
@@ -118,6 +135,12 @@ class SocketManager {
             delete event.verifiedUserId;
           }
           await this.addGameEvent(message.gid, event);
+          // A successful create persists the bootstrap row, so future events
+          // from this socket can skip the gameExists lookup.
+          if (event.type === 'create') {
+            const verified: Set<string> = (socket.data.verifiedGids ||= new Set());
+            verified.add(message.gid);
+          }
           if (typeof ack === 'function') ack();
         } catch (err) {
           console.error(`[Socket] game_event error:`, err);
