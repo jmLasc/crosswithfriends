@@ -114,6 +114,31 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update && sudo apt-get install -y k6
 
+      # /api/version returning the new SHA only proves the app booted —
+      # the DB connection pool, query plan caches, and the V8 hot path are
+      # still cold. Hit each endpoint k6 measures so the warmup tail isn't
+      # what trips the strict thresholds.
+      #
+      # -g disables curl's URL globbing so the bracketed query keys
+      # (`filter[sizeFilter][Standard]`) aren't interpreted as ranges.
+      # Login is intentionally NOT warmed: it's behind strictLimiter
+      # (10/15min) and the k6 auth test setup already burns ~10 logins
+      # creating real users — extra warmup hits would push the bucket
+      # over and trigger 429s, defeating the threshold check.
+      - name: Warm up endpoints
+        run: |
+          set +e
+          warm() {
+            for i in 1 2 3 4 5; do curl -gsS -o /dev/null "$@" || true; done
+          }
+          warm "$BASE_URL/api/puzzle_list?page=0&pageSize=20&filter[sizeFilter][Standard]=true&filter[typeFilter][Standard]=true"
+          warm "$BASE_URL/api/puzzle/lt-std-1/info"
+          warm -X POST -H "Content-Type: application/json" -d '{"gids":["lt-game-1","lt-game-50","lt-game-100"]}' "$BASE_URL/api/game-progress"
+          # /me without a token returns 401 fast but still exercises requireAuth
+          # and the JWT verify path. No rate limiter on this endpoint.
+          warm "$BASE_URL/api/auth/me"
+          echo "Warmup complete"
+
       - name: Run API read tests
         env:
           K6_PROFILE: smoke
